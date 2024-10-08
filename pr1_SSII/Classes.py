@@ -1,10 +1,25 @@
+import json
+
+class Accion:
+    def __init__(self, origen, destino, coste):
+        self.origen = origen
+        self.destino = destino
+        self.coste = coste
+
+
+class Estado:
+    def __init__(self, interseccion):
+        self.interseccion = interseccion
+
+
 class Nodo:
-    def __init__(self, estado, padre=None, accion=None, coste=0, profundidad=0):
+    def __init__(self,  estado, padre=None, accion=None, coste=0, profundidad=0, id=1):
         self.estado = estado
         self.padre = padre
         self.accion = accion
         self.coste = coste
         self.profundidad = profundidad
+        self.id = id
     
     def hijo(self, accion):
         estado_resultante = accion  # Suponiendo que las acciones modifican el estado
@@ -20,12 +35,19 @@ class Nodo:
         solucion.reverse()  # Para tener la solución en orden desde el inicio hasta el final
         return solucion
 
+
 class Problema:
-    def __init__(self, datos_json):
-        self.estado_inicial = datos_json["initial"]
-        self.estado_objetivo = datos_json["final"]
-        self.segmentos = datos_json["segments"]
+    def __init__(self, ruta_json):
+        with open(ruta_json, 'r') as archivo:
+            self.datos_json = json.load(archivo)
+
+        self.distancia = self.datos_json["distance"]
+        self.interseccion = self.datos_json["intersections"]
+        self.estado_inicial = self.datos_json["initial"]
+        self.estado_objetivo = self.datos_json["final"]
+        self.segmentos = self.datos_json["segments"]
     
+
     def es_objetivo(self, estado):
         return estado == self.estado_objetivo
     
@@ -43,3 +65,4 @@ class Problema:
             if seg["origin"] == nodo.estado and seg["destination"] == accion:
                 return seg["distance"]
         return float('inf')  # Si no se encuentra el segmento
+
