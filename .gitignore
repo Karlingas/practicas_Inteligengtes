@@ -1,13 +1,4 @@
-pr1_SSII/figures/medium/calle_mariÌa_mariÌn_500_0.png
-pr1_SSII/figures/medium/calle_mariÌa_mariÌn_500_1.png
-pr1_SSII/figures/small/avenida_de_espanÌa_250_0.png
-pr1_SSII/figures/small/avenida_de_espanÌa_250_1.png
-pr1_SSII/figures/small/paseo_simoÌn_abril_250_0.png
-pr1_SSII/figures/small/paseo_simoÌn_abril_250_1.png
-pr1_SSII/problems/medium/calle_mariÌa_mariÌn_500_0.json
-pr1_SSII/problems/medium/calle_mariÌa_mariÌn_500_1.json
-pr1_SSII/problems/small/avenida_de_espanÌa_250_0.json
-pr1_SSII/problems/small/avenida_de_espanÌa_250_1.json
-pr1_SSII/problems/small/paseo_simoÌn_abril_250_0.json
-pr1_SSII/problems/small/paseo_simoÌn_abril_250_1.json
-pr1_SSII/problems/medium/calle_mariÌa_mariÌn_500_0.json
+pr1_SSII/figures
+pr1_SSII/problems
+pr1_SSII/__pycache__
+

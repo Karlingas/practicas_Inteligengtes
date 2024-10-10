@@ -10,6 +10,7 @@ class Accion:
 class Estado:
     def __init__(self, interseccion):
         self.interseccion = interseccion
+        
 
 
 class Nodo:
@@ -34,6 +35,9 @@ class Nodo:
             nodo_actual = nodo_actual.padre
         solucion.reverse()  # Para tener la solución en orden desde el inicio hasta el final
         return solucion
+    
+    def getInterseccion(self):
+        return self.estado.interseccion
 
 
 class Problema:
