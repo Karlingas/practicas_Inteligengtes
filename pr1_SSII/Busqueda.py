@@ -14,16 +14,17 @@ class Busqueda(ABC):
 
     def expandir(self, nodo, problema):
         sucesores = []
-        for accion in problema.acciones(nodo.estado):
-            resultado = problema.resultado(nodo.estado, accion)
-            s = Nodo(resultado, nodo, accion)
-            s.coste = nodo.coste + problema.coste_individual(nodo, accion, s)
+        nodo.defineAcciones()
+        for accion in nodo.acciones:
+            resultado = accion.destino
+            s = Nodo(id=resultado, padre=nodo, problema= problema)
+            s.coste = nodo.coste + accion.coste
             s.profundidad = nodo.profundidad + 1
             sucesores.append(s)
         return sucesores      
     
     def buscar(self):
-        nodo_inicial = Nodo(self.problema.estado_inicial)
+        nodo_inicial = Nodo(self.problema.estado_inicial,problema=self.problema)
         self.frontera = self.insertar_nodo(nodo_inicial, self.frontera)
 
         while not self.es_vacio(self.frontera): #movido aqui y que salga del bucle
@@ -38,7 +39,7 @@ class Busqueda(ABC):
                 if self.problema.es_objetivo(nodo.estado):
                     coste = nodo.coste
                     profundidad = nodo.profundidad
-                    return nodo.solucion(), self.soluciones_generadas, self.nodos_explorados, self.nodos_expandidos, coste, profundidad
+                    return nodo.getSolucion(), self.soluciones_generadas, self.nodos_explorados, self.nodos_expandidos, coste, profundidad
                 
                 
                 

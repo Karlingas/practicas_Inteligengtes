@@ -27,9 +27,9 @@ solucion, soluciones_generadas, nodos_explorados, nodos_expandidos, coste, profu
 imprimir_esta()
 
 # Profundidad
-profun = Busqueda_Profundidad(problema=problema)
-solucion, soluciones_generadas, nodos_explorados, nodos_expandidos, coste, profundidad = profun.buscar()
-imprimir_esta()
+#profun = Busqueda_Profundidad(problema=problema)
+#solucion, soluciones_generadas, nodos_explorados, nodos_expandidos, coste, profundidad = profun.buscar()
+#imprimir_esta()
 
 
 
