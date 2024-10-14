@@ -34,7 +34,7 @@ class Busqueda(ABC):
             self.nodos_explorados += 1
 
             # Comprobamos que el nodo a comprobar no es cerrado
-            if not self.cerrados.__contains__(nodo.estado):
+            if not self.cerrados.__contains__(nodo.estado.interseccion_id):
                 # Comprobamos si el nodo es la solución
                 if self.problema.es_objetivo(nodo.estado):
                     coste = nodo.coste
@@ -52,7 +52,7 @@ class Busqueda(ABC):
                 self.soluciones_generadas += len(sucesores)
 
                 print("\n añadido a cerrados")
-                self.cerrados.add(nodo.estado)
+                self.cerrados.add(nodo.estado.interseccion_id)
                 
             
             print("\n sigo, profundidad "+ str(nodo.profundidad))

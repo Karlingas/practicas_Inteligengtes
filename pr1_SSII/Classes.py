@@ -32,13 +32,14 @@ class Nodo:
         solucion = []
         nodo_actual = self
         while nodo_actual.padre is not None:
-            solucion.append(nodo_actual.accion)
+            solucion.append(nodo_actual.estado.interseccion_id)
             nodo_actual = nodo_actual.padre
         solucion.reverse()  # Para tener la solución en orden desde el inicio hasta el final
         return solucion
     
     def defineAcciones(self):
         self.acciones = self.problema.obten_acciones(self.estado)
+        
     
 
 class Problema:
@@ -54,12 +55,12 @@ class Problema:
     
 
     def es_objetivo(self, estado):
-        return estado == self.estado_objetivo
+        return estado.interseccion_id == self.estado_objetivo
     
     def obten_acciones(self, estado):
     # Aquí se devuelven objetos de la clase Accion, que contienen origen, destino y coste (distancia)
         return [Accion(origen=seg["origin"], destino=seg["destination"], coste=seg["distance"]) 
-            for seg in self.segmentos if seg["origin"] == estado]
+            for seg in self.segmentos if seg["origin"] == estado.interseccion_id]
 
     
     #def resultado(self, estado, accion):

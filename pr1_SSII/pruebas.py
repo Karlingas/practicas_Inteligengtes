@@ -3,7 +3,7 @@ from Busqueda import Busqueda_Anchura,Busqueda_Profundidad
 #Windows
 #ruta_json = r'problems\medium\calle_mariÌa_mariÌn_500_0.json'
 #MacOs
-ruta_json = r'pr1_SSII/problems/small/avenida_de_espanÌa_250_1.json'
+ruta_json = r'pr1_SSII/problems/medium/calle_mariÌa_mariÌn_500_0.json'
 
 # Mostrar la solución y estadísticas
 def imprimir_esta():
@@ -27,9 +27,9 @@ solucion, soluciones_generadas, nodos_explorados, nodos_expandidos, coste, profu
 imprimir_esta()
 
 # Profundidad
-#profun = Busqueda_Profundidad(problema=problema)
-#solucion, soluciones_generadas, nodos_explorados, nodos_expandidos, coste, profundidad = profun.buscar()
-#imprimir_esta()
+profun = Busqueda_Profundidad(problema=problema)
+solucion, soluciones_generadas, nodos_explorados, nodos_expandidos, coste, profundidad = profun.buscar()
+imprimir_esta()
 
 
 
