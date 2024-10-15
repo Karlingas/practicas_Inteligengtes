@@ -1,5 +1,6 @@
 from Classes import *
 from abc import ABC,abstractmethod
+from queue import PriorityQueue
 
 class Busqueda(ABC):
     def __init__(self, problema):
@@ -75,6 +76,7 @@ class Busqueda(ABC):
         pass
 
 
+
 class Busqueda_Anchura(Busqueda):
 
     def __init__(self, problema):
@@ -131,6 +133,42 @@ class Busqueda_Profundidad(Busqueda):
 
 
 #class Busqueda_Primero_Mejor(Busqueda):
+    def __init__(self, problema):
+        super().__init__(problema)
+    
+    #La estructura de la frontera es una cola de prioridad (PriorityQueue), 
+    # donde el nodo con mayor valor de la función heurística es el primero en salir (el que tenga mejor heurística)
+    # La función heurística es la distancia entre el nodo actual y el nodo objetivo (hasta el nodo objetivo) y la velocidad máxima
+    # de la carretera
+    # La función heurística se calcula en el método getHeuristica
+    def getHeuristica(self, nodo):
+        return (nodo.estado.distancia_objetivo / nodo.estado.velocidad_maxima)
+    
+    # Se inserta en la cola de prioridad
+    def insertar_nodo(self, nodo, frontera):
+        frontera.put((self.getHeuristica(nodo), nodo))
+        return frontera
+
+    # Se agregan los sucesores a la cola de prioridad
+    def concatenar_nodos(self, frontera, sucesores):
+        for sucesor in sucesores:
+            frontera.put((self.getHeuristica(sucesor), sucesor))
+        return frontera
+
+    # Se extrae el nodo con la mayor prioridad (menor valor heurístico)
+    def extraer_nodo(self, frontera):
+        return frontera.get()[1]
+
+    # Comprueba si la cola de prioridad está vacía
+    def es_vacio(self, frontera):
+        return frontera.empty()
+    
+    def buscar(self):
+        self.frontera = PriorityQueue()
+        return super().buscar()
+    
+
+    
 
 
 
