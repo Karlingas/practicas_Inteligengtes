@@ -51,11 +51,11 @@ class Busqueda(ABC):
                 self.frontera = self.concatenar_nodos(self.frontera, sucesores)
                 self.soluciones_generadas += len(sucesores)
 
-                print("\n añadido a cerrados")
+                #print("\n añadido a cerrados")
                 self.cerrados.add(nodo.estado.interseccion_id)
                 
             
-            print("\n sigo, profundidad "+ str(nodo.profundidad))
+            #print("\n sigo, profundidad "+ str(nodo.profundidad))
 
             
         
