@@ -132,7 +132,7 @@ class Busqueda_Profundidad(Busqueda):
         return super().buscar()
 
 
-#class Busqueda_Primero_Mejor(Busqueda):
+class Busqueda_Primero_Mejor(Busqueda):
     def __init__(self, problema):
         super().__init__(problema)
     
@@ -142,7 +142,7 @@ class Busqueda_Profundidad(Busqueda):
     # de la carretera
     # La función heurística se calcula en el método getHeuristica
     def getHeuristica(self, nodo):
-        return (nodo.estado.distancia_objetivo / nodo.estado.velocidad_maxima)
+        return nodo.getDistanciaFinal() / nodo.getVelocidad()
     
     # Se inserta en la cola de prioridad
     def insertar_nodo(self, nodo, frontera):
