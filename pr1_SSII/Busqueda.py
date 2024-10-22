@@ -42,8 +42,6 @@ class Busqueda(ABC):
                     profundidad = nodo.profundidad
                     return nodo.getSolucion(), self.soluciones_generadas, self.nodos_explorados, self.nodos_expandidos, coste, profundidad
                 
-                
-                
                 # Si no es la solución, expandimos los nodos sucesores
                 sucesores = self.expandir(nodo, self.problema)
                 self.nodos_expandidos += len(sucesores)
@@ -52,11 +50,9 @@ class Busqueda(ABC):
                 self.frontera = self.concatenar_nodos(self.frontera, sucesores)
                 self.soluciones_generadas += len(sucesores)
 
-                #print("\n añadido a cerrados")
                 self.cerrados.add(nodo.estado.interseccion_id)
                 
             
-            #print("\n sigo, profundidad "+ str(nodo.profundidad))
 
             
         
@@ -141,18 +137,22 @@ class Busqueda_Primero_Mejor(Busqueda):
     # La función heurística es la distancia entre el nodo actual y el nodo objetivo (hasta el nodo objetivo) y la velocidad máxima
     # de la carretera
     # La función heurística se calcula en el método getHeuristica
+
+    #Creo que la solucion a nuestros problemas es
     def getHeuristica(self, nodo):
-        return nodo.getDistanciaFinal() / nodo.getVelocidad()
+        nodo.heuristica = nodo.getDistanciaFinal() / nodo.getVelocidad()
     
     # Se inserta en la cola de prioridad
     def insertar_nodo(self, nodo, frontera):
-        frontera.put((self.getHeuristica(nodo), nodo))
+        self.getHeuristica(nodo)
+        frontera.put((nodo.heuristica, nodo))
         return frontera
 
     # Se agregan los sucesores a la cola de prioridad
     def concatenar_nodos(self, frontera, sucesores):
         for sucesor in sucesores:
-            frontera.put((self.getHeuristica(sucesor), sucesor))
+            self.getHeuristica(sucesor)
+            frontera.put((sucesor.heuristica , sucesor))
         return frontera
 
     # Se extrae el nodo con la mayor prioridad (menor valor heurístico)

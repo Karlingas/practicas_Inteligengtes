@@ -22,11 +22,10 @@ class Nodo:
         self.padre = padre
         self.coste = coste
         self.profundidad = profundidad 
-    
-    #def hijo(self, accion):
-        #estado_resultante = accion  # Suponiendo que las obten_acciones modifican el estado
-        #return Nodo(estado_resultante, self, accion, self.coste + 1, self.profundidad + 1)
-    
+        self.heuristica = 0 
+
+    def __lt__(self, other):
+        return self.heuristica < other.heuristica   
 
     def getSolucion(self):
         # Reconstruir el camino de la solución desde el nodo inicial
@@ -97,18 +96,3 @@ class Problema:
     # Aquí se devuelven objetos de la clase Accion, que contienen origen, destino y coste (distancia)
         return [Accion(origen=seg["origin"], destino=seg["destination"], coste=seg["distance"]) 
             for seg in self.segmentos if seg["origin"] == estado.interseccion_id]
-
-    
-    #def resultado(self, estado, accion):
-        # El resultado de aplicar una acción es simplemente el destino (intersección) al que se va
-        return accion
-    
-
-    #no hace falta coste individual si tenemos accion como una clase que contiene el coste de la accion
-    #def coste_individual(self, nodo, accion, s):
-        # Calcular el coste de la acción
-        for seg in self.segmentos:
-            if seg["origin"] == nodo.estado and seg["destination"] == accion:
-                return seg["distance"]
-        return float('inf')  # Si no se encuentra el segmento
-

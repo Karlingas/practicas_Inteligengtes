@@ -1,9 +1,9 @@
 from Classes import *
-from Busqueda import Busqueda_Anchura,Busqueda_Profundidad
+from Busqueda import Busqueda_Anchura, Busqueda_Primero_Mejor,Busqueda_Profundidad
 #Windows
 #ruta_json = r'problems\medium\calle_mariÌa_mariÌn_500_0.json'
 #MacOs
-ruta_json = r'pr1_SSII/problems/medium/calle_mariÌa_mariÌn_500_0.json'
+ruta_json = r'pr1_SSII/examples_with_solutions/problems/huge/calle_de_francisco_javier_de_moya_albacete_5000_3.json'
 
 # Mostrar la solución y estadísticas
 def imprimir_esta():
@@ -22,14 +22,18 @@ def imprimir_esta():
 problema = Problema(ruta_json)
 
 # Anchura
-anchura = Busqueda_Anchura(problema=problema)
-solucion, soluciones_generadas, nodos_explorados, nodos_expandidos, coste, profundidad = anchura.buscar()
-imprimir_esta()
+#anchura = Busqueda_Anchura(problema=problema)
+#solucion, soluciones_generadas, nodos_explorados, nodos_expandidos, coste, profundidad = anchura.buscar()
+#imprimir_esta()
 
 # Profundidad
-profun = Busqueda_Profundidad(problema=problema)
-solucion, soluciones_generadas, nodos_explorados, nodos_expandidos, coste, profundidad = profun.buscar()
+#profun = Busqueda_Profundidad(problema=problema)
+#solucion, soluciones_generadas, nodos_explorados, nodos_expandidos, coste, profundidad = profun.buscar()
+#imprimir_esta()
+
+primero_mejor = Busqueda_Primero_Mejor(problema)
+
+# Ejecutar el algoritmo de búsqueda
+solucion, soluciones_generadas, nodos_explorados, nodos_expandidos, coste, profundidad = primero_mejor.buscar()
 imprimir_esta()
-
-
 
