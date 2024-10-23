@@ -5,12 +5,17 @@ class Accion:
     def __init__(self, origen, destino, coste):
         self.origen = origen
         self.destino = destino
-        self.coste = coste
+        self.coste = coste 
 
 
 class Estado:
     def __init__(self, interseccion):
         self.interseccion_id = interseccion
+
+    def aplicar_accion(self, accion):
+        if self.interseccion_id == accion.origen:
+            return Estado(accion.destino)
+        return False #no se puede hacer la accion 
         
 
 
@@ -34,6 +39,7 @@ class Nodo:
         while nodo_actual.padre is not None:
             solucion.append(nodo_actual.estado.interseccion_id)
             nodo_actual = nodo_actual.padre
+        solucion.append(nodo_actual.estado.interseccion_id)
         solucion.reverse()  # Para tener la solución en orden desde el inicio hasta el final
         return solucion
     
@@ -66,17 +72,31 @@ class Nodo:
         
         return distancia
 
-    # Obtener la velocidad entre el estado actual y el estado siguiente en el problema
-    def getVelocidad(self):
-        # Buscar el segmento correspondiente al estado actual y el destino siguiente
-        for segmento in self.problema.segmentos:
-            if segmento["origin"] == self.estado.interseccion_id:
-                # Devolver la velocidad del segmento actual
-                return segmento["speed"]
+    # Obtener la distancia entre el estado actual y el estado inicial en el problema
+    def getDistanciaInicial(self):
+        # Obtener la intersección actual del estado
+        interseccion_actual = None
+        for interseccion in self.problema.interseccion:
+            if interseccion["identifier"] == self.estado.interseccion_id:
+                interseccion_actual = interseccion
+                break
+
+        # Obtener el estado objetivo
+        for interseccion in self.problema.interseccion:
+            if interseccion["identifier"] == self.problema.estado_inicial:
+                interseccion_inicial = interseccion
+                break
         
-        # Si no se encuentra el segmento, devolvemos una velocidad de 0
-        return 0
-        
+        # Calcular la distancia entre el estado actual y el estado objetivo
+        lat_actual = interseccion_actual["latitude"]
+        lon_actual = interseccion_actual["longitude"]
+        lat_objetivo = interseccion_inicial["latitude"]
+        lon_objetivo = interseccion_inicial["longitude"]
+
+        # Fórmula de distancia euclidiana entre los puntos (lat, lon) del estado actual y el final
+        distancia = math.sqrt((lat_actual - lat_objetivo) ** 2 + (lon_actual - lon_objetivo) ** 2)
+        return distancia
+    
 class Problema:
     def __init__(self, ruta_json):
         with open(ruta_json, 'r') as archivo:
@@ -87,6 +107,11 @@ class Problema:
         self.estado_inicial = self.datos_json["initial"]
         self.estado_objetivo = self.datos_json["final"]
         self.segmentos = self.datos_json["segments"]
+        self.veloMax = 0
+        for seg in self.segmentos:
+            if seg["speed"] > self.veloMax :
+                self.veloMax = seg["speed"]
+        
     
 
     def es_objetivo(self, estado):
@@ -94,5 +119,5 @@ class Problema:
     
     def obten_acciones(self, estado):
     # Aquí se devuelven objetos de la clase Accion, que contienen origen, destino y coste (distancia)
-        return [Accion(origen=seg["origin"], destino=seg["destination"], coste=seg["distance"]) 
+        return [Accion(seg["origin"], seg["destination"], (seg["distance"]/(seg["speed"]*0.28))) 
             for seg in self.segmentos if seg["origin"] == estado.interseccion_id]

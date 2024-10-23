@@ -17,8 +17,7 @@ class Busqueda(ABC):
         sucesores = []
         nodo.defineAcciones()
         for accion in nodo.acciones:
-            resultado = accion.destino
-            s = Nodo(id=resultado, padre=nodo, problema= problema)
+            s = Nodo(id=nodo.estado.aplicar_accion(accion), padre=nodo, problema= problema)
             s.coste = nodo.coste + accion.coste
             s.profundidad = nodo.profundidad + 1
             sucesores.append(s)
@@ -35,7 +34,7 @@ class Busqueda(ABC):
             self.nodos_explorados += 1
 
             # Comprobamos que el nodo a comprobar no es cerrado
-            if not self.cerrados.__contains__(nodo.estado.interseccion_id):
+            if nodo.estado.interseccion_id not in self.cerrados:
                 # Comprobamos si el nodo es la solución
                 if self.problema.es_objetivo(nodo.estado):
                     coste = nodo.coste
@@ -45,9 +44,12 @@ class Busqueda(ABC):
                 # Si no es la solución, expandimos los nodos sucesores
                 sucesores = self.expandir(nodo, self.problema)
                 self.nodos_expandidos += len(sucesores)
-            
-                # Concatenar los sucesores a la frontera
-                self.frontera = self.concatenar_nodos(self.frontera, sucesores)
+
+
+                for sucesor in sucesores:
+                    self.insertar_nodo(sucesor,self.frontera)
+                
+
                 self.soluciones_generadas += len(sucesores)
 
                 self.cerrados.add(nodo.estado.interseccion_id)
@@ -60,9 +62,6 @@ class Busqueda(ABC):
     
     @abstractmethod
     def insertar_nodo(self, nodo, frontera):
-        pass
-    @abstractmethod
-    def concatenar_nodos(self, frontera, sucesores):
         pass
     @abstractmethod
     def extraer_nodo(self, frontera):
@@ -86,12 +85,7 @@ class Busqueda_Anchura(Busqueda):
         frontera.append(nodo)  
         return frontera
     
-    # Se agregan al final
-    def concatenar_nodos(self, frontera, sucesores):
-        frontera.extend(sucesores)
-        return frontera
-    
-     # Se extrae el primero (FIFO)
+    # Se extrae el primero (FIFO)
     def extraer_nodo(self, frontera):
         return frontera.pop(0) 
     
@@ -113,10 +107,6 @@ class Busqueda_Profundidad(Busqueda):
         frontera.insert(0, nodo)
         return frontera
     
-    # Se agregan al final
-    def concatenar_nodos(self, frontera, sucesores):
-        return sucesores + frontera
-    
      # Se extrae el primero (FIlO)
     def extraer_nodo(self, frontera):
         return frontera.pop(0) 
@@ -126,7 +116,6 @@ class Busqueda_Profundidad(Busqueda):
     
     def buscar(self):
         return super().buscar()
-
 
 class Busqueda_Primero_Mejor(Busqueda):
     def __init__(self, problema):
@@ -140,7 +129,8 @@ class Busqueda_Primero_Mejor(Busqueda):
 
     #Creo que la solucion a nuestros problemas es
     def getHeuristica(self, nodo):
-        nodo.heuristica = nodo.getDistanciaFinal() / nodo.getVelocidad()
+        #Es la distancia eucladiana explicado en el propio metodo
+        nodo.heuristica = nodo.getDistanciaFinal() / self.problema.veloMax
     
     # Se inserta en la cola de prioridad
     def insertar_nodo(self, nodo, frontera):
@@ -148,11 +138,39 @@ class Busqueda_Primero_Mejor(Busqueda):
         frontera.put((nodo.heuristica, nodo))
         return frontera
 
-    # Se agregan los sucesores a la cola de prioridad
-    def concatenar_nodos(self, frontera, sucesores):
-        for sucesor in sucesores:
-            self.getHeuristica(sucesor)
-            frontera.put((sucesor.heuristica , sucesor))
+    # Se extrae el nodo con la mayor prioridad (menor valor heurístico)
+    def extraer_nodo(self, frontera):
+        return frontera.get()[1]
+
+    # Comprueba si la cola de prioridad está vacía
+    def es_vacio(self, frontera):
+        return frontera.empty()
+    
+    def buscar(self):
+        self.frontera = PriorityQueue()
+        return super().buscar()
+
+class Busqueda_a_estrella(Busqueda):
+    def __init__(self, problema):
+        super().__init__(problema)
+    
+    #La estructura de la frontera es una cola de prioridad (PriorityQueue), 
+    # donde el nodo con mayor valor de la función heurística es el primero en salir (el que tenga mejor heurística)
+    # La función heurística es la distancia entre el nodo actual y el nodo objetivo (hasta el nodo objetivo) y la velocidad máxima
+    # de la carretera
+    # La función heurística se calcula en el método getHeuristica
+
+    #Creo que la solucion a nuestros problemas es
+    def getHeuristica(self, nodo):
+        #Es la distancia eucladiana explicado en el propio metodo
+        final = nodo.getDistanciaFinal() / self.problema.veloMax
+        inicial = nodo.getDistanciaInicial() / self.problema.veloMax
+        nodo.heuristica = final + inicial
+    
+    # Se inserta en la cola de prioridad
+    def insertar_nodo(self, nodo, frontera):
+        self.getHeuristica(nodo)
+        frontera.put(((nodo.heuristica), nodo))
         return frontera
 
     # Se extrae el nodo con la mayor prioridad (menor valor heurístico)
