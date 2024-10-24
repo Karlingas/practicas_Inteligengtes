@@ -1,9 +1,9 @@
 from Classes import *
 from Busqueda import Busqueda_Anchura, Busqueda_Primero_Mejor,Busqueda_Profundidad, Busqueda_a_estrella
 #Windows
-#ruta_json = r'problems\medium\calle_mariÌa_mariÌn_500_0.json'
+ruta_json = r'pr1_SSII\examples_with_solutions\problems\huge\calle_agustina_aroca_albacete_5000_0.json'
 #MacOs
-ruta_json = r'pr1_SSII/examples_with_solutions/problems/huge/calle_agustina_aroca_albacete_5000_0.json'
+#ruta_json = r'pr1_SSII/examples_with_solutions/problems/huge/calle_agustina_aroca_albacete_5000_0.json'
 
 #horas
 def horas(numero):

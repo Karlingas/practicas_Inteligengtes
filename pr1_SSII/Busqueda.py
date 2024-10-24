@@ -29,7 +29,7 @@ class Busqueda(ABC):
         inicio = time.perf_counter()
         nodo_inicial = Nodo(self.problema.estado_inicial,problema=self.problema)
         self.frontera = self.insertar_nodo(nodo_inicial, self.frontera)
-
+        self.soluciones_generadas += 1
         while not self.es_vacio(self.frontera):
 
             # Extraemos el primer nodo de la frontera
@@ -56,7 +56,7 @@ class Busqueda(ABC):
             if nodo.estado.interseccion_id not in self.cerrados: 
                 # Si no es la solución, expandimos los nodos sucesores
                 sucesores = self.expandir(nodo, self.problema)
-                self.nodos_expandidos += len(sucesores)
+                self.nodos_expandidos += 1
 
                 for sucesor in sucesores:
                     self.insertar_nodo(sucesor,self.frontera)
@@ -182,8 +182,7 @@ class Busqueda_a_estrella(Busqueda):
     def getHeuristica(self, nodo):
         #Es la distancia eucladiana explicado en el propio metodo
         final = nodo.getDistanciaFinal() / self.problema.veloMax
-        inicial = nodo.getDistanciaInicial() / self.problema.veloMax
-        return final + inicial
+        return final + nodo.coste
     
     # Se inserta en la cola de prioridad
     def insertar_nodo(self, nodo, frontera):
