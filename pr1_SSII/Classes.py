@@ -20,9 +20,12 @@ class Estado:
 
 
 class Nodo:
-    def __init__(self, id=None, padre=None, coste=0, profundidad=0, problema=None):
+    def __init__(self, estado=None, padre=None, coste=0, profundidad=0, problema=None):
         self.problema = problema
-        self.estado = Estado(id)
+        if isinstance(estado, Estado):
+            self.estado = estado
+        else :
+            self.estado = Estado(estado)
         self.acciones = []
         self.padre = padre
         self.coste = coste
@@ -54,13 +57,11 @@ class Nodo:
             if interseccion["identifier"] == self.estado.interseccion_id:
                 interseccion_actual = interseccion
                 break
-
         # Obtener el estado objetivo
         for interseccion in self.problema.interseccion:
             if interseccion["identifier"] == self.problema.estado_objetivo:
                 interseccion_objetivo = interseccion
                 break
-        
         # Calcular la distancia entre el estado actual y el estado objetivo
         lat_actual = interseccion_actual["latitude"]
         lon_actual = interseccion_actual["longitude"]
@@ -93,7 +94,7 @@ class Nodo:
         lat_objetivo = interseccion_inicial["latitude"]
         lon_objetivo = interseccion_inicial["longitude"]
 
-        # Fórmula de distancia euclidiana entre los puntos (lat, lon) del estado actual y el final
+        # Fórmula de distancia euclidiana entre los puntos (lat, lon) del estado actual y el inicial
         distancia = math.sqrt((lat_actual - lat_objetivo) ** 2 + (lon_actual - lon_objetivo) ** 2)
         return distancia
     
@@ -119,5 +120,5 @@ class Problema:
     
     def obten_acciones(self, estado):
     # Aquí se devuelven objetos de la clase Accion, que contienen origen, destino y coste (distancia)
-        return [Accion(seg["origin"], seg["destination"], (seg["distance"]/(seg["speed"]*0.28))) 
+        return [Accion(seg["origin"], seg["destination"], (seg["distance"]/(seg["speed"]*(10/36)))) 
             for seg in self.segmentos if seg["origin"] == estado.interseccion_id]
