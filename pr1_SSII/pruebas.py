@@ -3,7 +3,7 @@ from Busqueda import Busqueda_Anchura, Busqueda_Primero_Mejor,Busqueda_Profundid
 #Windows
 #ruta_json = r'problems\medium\calle_mariÌa_mariÌn_500_0.json'
 #MacOs
-ruta_json = r'pr1_SSII/examples_with_solutions/problems/huge/calle_agustina_aroca_albacete_5000_0.json'
+ruta_json = r'pr1_SSII/examples_with_solutions/problems/large/calle_agustina_aroca_albacete_1000_2.json'
 
 #horas
 def horas(numero):
@@ -15,14 +15,13 @@ def horas(numero):
 # Mostrar la solución y estadísticas
 def imprimir_esta():
     if solucion:
-        print("Solución encontrada:", solucion)
+        print("\n\nEstadísticas:")
         print("Tiempo de ejecuccion: ", tiempo)
-        print("Estadísticas:")
-        print(f"Número de soluciones generadas: {soluciones_generadas}")
-        print(f"Número de nodos explorados: {nodos_explorados}")
-        print(f"Número de nodos expandidos: {nodos_expandidos}")
-        print(f"Coste de la solución: {horas(coste/60)}")
+        print(f"Nodos generados: {soluciones_generadas}")
+        print(f"Nodos expandidos: {nodos_expandidos}")
+        print(f"Coste: {horas(coste/60)}")
         print(f"Profundidad de la solución: {profundidad}")
+        print("Solución encontrada:", solucion)
     else:
         print("No se encontró solución.")
 
@@ -31,19 +30,11 @@ problema = Problema(ruta_json)
 
 # Anchura
 anchura = Busqueda_Anchura(problema=problema)
-solucion, soluciones_generadas, nodos_explorados, nodos_expandidos, coste, profundidad, tiempo = anchura.buscar()
+solucion, soluciones_generadas, nodos_expandidos, coste, profundidad, tiempo = anchura.buscar()
 imprimir_esta()
 
 # Profundidad
 profun = Busqueda_Profundidad(problema=problema)
-solucion, soluciones_generadas, nodos_explorados, nodos_expandidos, coste, profundidad, tiempo = profun.buscar()
+solucion, soluciones_generadas, nodos_expandidos, coste, profundidad, tiempo = profun.buscar()
 imprimir_esta()
 
-primero_mejor = Busqueda_Primero_Mejor(problema)
-# Ejecutar el algoritmo de búsqueda
-solucion, soluciones_generadas, nodos_explorados, nodos_expandidos, coste, profundidad, tiempo = primero_mejor.buscar()
-imprimir_esta()
-
-a_estre = Busqueda_a_estrella(problema)
-solucion, soluciones_generadas, nodos_explorados, nodos_expandidos, coste, profundidad, tiempo = a_estre.buscar()
-imprimir_esta()

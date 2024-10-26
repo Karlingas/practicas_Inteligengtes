@@ -31,38 +31,35 @@ class Busqueda(ABC):
         self.frontera = self.insertar_nodo(nodo_inicial, self.frontera)
 
         while not self.es_vacio(self.frontera):
-
             # Extraemos el primer nodo de la frontera
             nodo = self.extraer_nodo(self.frontera)
-            self.nodos_explorados += 1
 
-            # Comprobamos si el nodo es la solución
-            if self.problema.es_objetivo(nodo.estado):
-                coste = nodo.coste
-                profundidad = nodo.profundidad
-                final = time.perf_counter()
-
-                tiempo_total = final - inicio
-
-                horas = int(tiempo_total // 3600)
-                minutos = int((tiempo_total % 3600) // 60)
-                segundos = int(tiempo_total % 60)
-                milisegundos = int((tiempo_total - int(tiempo_total)) * 1000000)
-                tiempo_formateado = f"{horas:01d}:{minutos:02d}:{segundos:02d}.{milisegundos:06d}"
-                
-                return nodo.getSolucion(), self.soluciones_generadas, self.nodos_explorados, self.nodos_expandidos, coste, profundidad, tiempo_formateado
-            
             # Comprobamos que el nodo a comprobar no es cerrado
             if nodo.estado.interseccion_id not in self.cerrados: 
+                self.nodos_expandidos += 1
+                # Comprobamos si el nodo es la solución
+                if self.problema.es_objetivo(nodo.estado):
+                    coste = nodo.coste
+                    profundidad = nodo.profundidad
+                    final = time.perf_counter()
+
+                    tiempo_total = final - inicio
+
+                    horas = int(tiempo_total // 3600)
+                    minutos = int((tiempo_total % 3600) // 60)
+                    segundos = int(tiempo_total % 60)
+                    milisegundos = int((tiempo_total - int(tiempo_total)) * 1000000)
+                    tiempo_formateado = f"{horas:01d}:{minutos:02d}:{segundos:02d}.{milisegundos:06d}"
+                
+                    return nodo.getSolucion(), self.soluciones_generadas, self.nodos_expandidos, coste, profundidad, tiempo_formateado
+            
                 # Si no es la solución, expandimos los nodos sucesores
                 sucesores = self.expandir(nodo, self.problema)
-                self.nodos_expandidos += len(sucesores)
+                self.soluciones_generadas += len(sucesores)
 
                 for sucesor in sucesores:
                     self.insertar_nodo(sucesor,self.frontera)
                 
-                self.soluciones_generadas += len(sucesores)
-
                 # Añadimos el nodo a la lista de cerrados DESPUÉS de expandirlo
                 self.cerrados.add(nodo.estado.interseccion_id) 
 
