@@ -147,10 +147,10 @@ class Busqueda_a_estrella(Busqueda):
         self.frontera = PriorityQueue()
 
     def insertarNodo(self, nodo, frontera):
-        #final = self.problema.getDistanciaFinal(nodo.estado) / self.problema.veloMax
-        inicial = self.problema.getDistanciaInicial(nodo.estado) / self.problema.veloMax
-
-        nodo.heuristica =  nodo.coste + inicial 
+        final = self.problema.getDistanciaFinal(nodo.estado) / self.problema.veloMax
+        #inicial = self.problema.getDistanciaInicial(nodo.estado) / self.problema.veloMax
+        
+        nodo.heuristica =  nodo.coste + final 
         frontera.put(((nodo.heuristica), nodo))
 
     def extraerNodo(self, frontera):
