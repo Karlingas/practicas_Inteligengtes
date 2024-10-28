@@ -69,7 +69,6 @@ class Busqueda(ABC):
         inicio = time.perf_counter()
         e_inicial = Nodo(self.problema.estado_inicial)
         self.insertarNodo(e_inicial, self.frontera)
-        self.nodos_generados += 1
 
         while not self.esVacio(self.frontera):
             nodo = self.extraerNodo(self.frontera)
@@ -139,13 +138,15 @@ class Busqueda_Primero_Mejor(Busqueda):
         return frontera.get()[1]
 
     def esVacio(self, frontera):
-        return not frontera
+        if frontera.qsize() == 0:
+            return True
+        return False
 
 class Busqueda_a_estrella(Busqueda):
     def __init__(self, problema):
         super().__init__(problema)
         self.frontera = PriorityQueue()
-        self.heuristica = Heuristica_Euclides(problema)
+        self.heuristica = Heuristica_Geodesica(problema)
 
     def insertarNodo(self, nodo, frontera):
         final = self.heuristica.getHeutistica(nodo.estado) / self.problema.veloMax
@@ -156,7 +157,9 @@ class Busqueda_a_estrella(Busqueda):
         return frontera.get()[1]
 
     def esVacio(self, frontera):
-        return not frontera
+        if frontera.qsize() == 0:
+            return True
+        return False
 
 class Heuristica(ABC):
     def __init__(self, problema):
@@ -177,13 +180,6 @@ class Heuristica(ABC):
 class Heuristica_Geodesica(Heuristica):
     def __init__(self, problema):
         super().__init__(problema)
-        for interseccion in self.problema.interseccion:
-            if interseccion["identifier"] == self.problema.estado_objetivo:
-                interseccion_objetivo = interseccion
-                break
-        
-        self.lat_objetivo = interseccion_objetivo["latitude"]
-        self.lon_objetivo = interseccion_objetivo["longitude"]
 
     def getHeutistica(self, estado):
         # Obtener la intersección actual del estado
@@ -197,7 +193,7 @@ class Heuristica_Geodesica(Heuristica):
         lon_actual = interseccion_actual["longitude"]
 
         #Formula para el calculo de la distancia geodesica
-        distancia = geodesic((lat_actual, lon_actual), (self.lat_objetivo, self.lon_objetivo)).kilometers * 1000
+        distancia = geodesic((lat_actual, lon_actual), (self.lat_objetivo, self.lon_objetivo)).meters
 
         return distancia
 
