@@ -129,9 +129,10 @@ class Busqueda_Primero_Mejor(Busqueda):
     def __init__(self, problema):
         super().__init__(problema)
         self.frontera = PriorityQueue()
+        self.heuristica = Heuristica_Geodesica(problema)
 
     def insertarNodo(self, nodo, frontera):
-        nodo.heuristica = self.problema.getDistanciaFinal(nodo.estado) / self.problema.veloMax
+        nodo.heuristica = self.heuristica.getHeutistica(nodo.estado) / self.problema.veloMax
         frontera.put(((nodo.heuristica), nodo))
 
     def extraerNodo(self, frontera):
@@ -140,16 +141,14 @@ class Busqueda_Primero_Mejor(Busqueda):
     def esVacio(self, frontera):
         return not frontera
 
-
 class Busqueda_a_estrella(Busqueda):
     def __init__(self, problema):
         super().__init__(problema)
         self.frontera = PriorityQueue()
+        self.heuristica = Heuristica_Euclides(problema)
 
     def insertarNodo(self, nodo, frontera):
-        final = self.problema.getDistanciaFinal(nodo.estado) / self.problema.veloMax
-        #inicial = self.problema.getDistanciaInicial(nodo.estado) / self.problema.veloMax
-        
+        final = self.heuristica.getHeutistica(nodo.estado) / self.problema.veloMax
         nodo.heuristica =  nodo.coste + final 
         frontera.put(((nodo.heuristica), nodo))
 
@@ -158,3 +157,67 @@ class Busqueda_a_estrella(Busqueda):
 
     def esVacio(self, frontera):
         return not frontera
+
+class Heuristica(ABC):
+    def __init__(self, problema):
+        self.problema = problema
+        #Obtenemos la lat y lon del estado objetivo
+        for interseccion in self.problema.interseccion:
+            if interseccion["identifier"] == self.problema.estado_objetivo:
+                interseccion_objetivo = interseccion
+                break
+        
+        self.lat_objetivo = interseccion_objetivo["latitude"]
+        self.lon_objetivo = interseccion_objetivo["longitude"]
+
+
+    def getHeutistica(self, estado):
+        pass
+
+class Heuristica_Geodesica(Heuristica):
+    def __init__(self, problema):
+        super().__init__(problema)
+        for interseccion in self.problema.interseccion:
+            if interseccion["identifier"] == self.problema.estado_objetivo:
+                interseccion_objetivo = interseccion
+                break
+        
+        self.lat_objetivo = interseccion_objetivo["latitude"]
+        self.lon_objetivo = interseccion_objetivo["longitude"]
+
+    def getHeutistica(self, estado):
+        # Obtener la intersección actual del estado
+        interseccion_actual = None
+        for interseccion in self.problema.interseccion:
+            if interseccion["identifier"] == estado.interseccion:
+                interseccion_actual = interseccion
+                break
+        # Calcular la distancia entre el estado actual y el estado objetivo
+        lat_actual = interseccion_actual["latitude"]
+        lon_actual = interseccion_actual["longitude"]
+
+        #Formula para el calculo de la distancia geodesica
+        distancia = geodesic((lat_actual, lon_actual), (self.lat_objetivo, self.lon_objetivo)).kilometers * 1000
+
+        return distancia
+
+class Heuristica_Euclides(Heuristica):
+    def __init__(self, problema):
+        super().__init__(problema)
+
+    def getHeutistica(self, estado):
+        # Obtener la intersección actual del estado
+        interseccion_actual = None
+        for interseccion in self.problema.interseccion:
+            if interseccion["identifier"] == estado.interseccion:
+                interseccion_actual = interseccion
+                break
+        
+        # Calcular la distancia entre el estado actual y el estado objetivo
+        lat_actual = interseccion_actual["latitude"]
+        lon_actual = interseccion_actual["longitude"]
+
+
+        # Formula para el calculo de la distancia eucladiana
+        distancia = math.dist([lat_actual, lon_actual],[self.lat_objetivo, self.lon_objetivo])
+        return distancia
