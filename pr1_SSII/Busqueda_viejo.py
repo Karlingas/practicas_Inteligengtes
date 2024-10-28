@@ -1,5 +1,5 @@
 import time
-from Classes import *
+from pr1_SSII.Classes_viejo import *
 from abc import ABC,abstractmethod
 from queue import PriorityQueue
 

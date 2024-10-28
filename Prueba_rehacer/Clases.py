@@ -1,6 +1,7 @@
 #Hay 4 clases, Accion Estado Nodo y Problema
 import json
 import math
+from geopy.distance import geodesic
 
 
 class Accion:
@@ -66,6 +67,8 @@ class Problema:
         for seg in self.segmentos:
             if seg["speed"] > self.veloMax :
                 self.veloMax = seg["speed"]
+        
+        self.veloMax = self.veloMax * (10/36)
     
     def getAcciones(self, estado):
         acciones = []
@@ -97,8 +100,10 @@ class Problema:
         lon_objetivo = interseccion_objetivo["longitude"]
 
         # Fórmula de distancia euclidiana entre los puntos (lat, lon) del estado actual y el final
-        distancia = math.sqrt((lat_objetivo-lat_actual ) ** 2 + (lon_objetivo-lon_actual ) ** 2)
         
+        #distancia = math.dist([lat_actual, lon_actual],[lat_objetivo, lon_objetivo])
+        distancia = geodesic((lat_actual, lon_actual), (lat_objetivo, lon_objetivo)).kilometers * 1000
+
         return distancia
 
     # Obtener la distancia entre el estado actual y el estado inicial en el problema
@@ -122,6 +127,6 @@ class Problema:
         lat_objetivo = interseccion_inicial["latitude"]
         lon_objetivo = interseccion_inicial["longitude"]
 
-        # Fórmula de distancia euclidiana entre los puntos (lat, lon) del estado actual y el inicial
-        distancia = math.sqrt((lat_actual - lat_objetivo) ** 2 + (lon_actual - lon_objetivo) ** 2)
+        # Formula para el calculo de la distancia geodesica
+        distancia = math.dist([lat_actual, lon_actual],[lat_objetivo, lon_objetivo])
         return distancia

@@ -1,5 +1,5 @@
-from Classes import *
-from Busqueda import Busqueda_Anchura, Busqueda_Primero_Mejor,Busqueda_Profundidad, Busqueda_a_estrella
+from pr1_SSII.Classes_viejo import *
+from pr1_SSII.Busqueda_viejo import Busqueda_Anchura, Busqueda_Primero_Mejor,Busqueda_Profundidad, Busqueda_a_estrella
 #Windows
 #ruta_json = r'problems\medium\calle_mariÌa_mariÌn_500_0.json'
 #MacOs
