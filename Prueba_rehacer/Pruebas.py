@@ -2,7 +2,7 @@ from Clases import *
 from Busqueda import *
 #ruta_json = r'problems\medium\calle_mariÌa_mariÌn_500_0.json'
 
-ruta_json = r'pr1_SSII/examples_with_solutions/problems/large/calle_agustina_aroca_albacete_1000_2.json'
+ruta_json = r'pr1_SSII/examples_with_solutions/problems/huge/calle_del_virrey_morcillo_albacete_2000_4.json'
 
 problema = Problema(ruta_json)
 
