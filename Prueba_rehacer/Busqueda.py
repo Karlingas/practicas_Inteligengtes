@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from collections import deque
-
+import copy
 from Clases import *
 import time
 from queue import PriorityQueue
@@ -57,34 +57,24 @@ class Busqueda(ABC):
             print("\n\nNo se encontró solución.")
 
     #Metodos para la busqueda
+
     def expandir(self, nodo):
         sucesores = []
-        acciones = self.problema.getAcciones(nodo.estado)
-        
-        # Convertir PriorityQueue en una lista temporal para iterar sin vaciarla
-        acciones_temporales = []
+        acciones = PriorityQueue()
+        acciones.queue = copy.deepcopy(self.problema.getAcciones(nodo.estado)) 
+        #Por alguna razon, si no hago copia, se elimina la queue de problema
+
         while not acciones.empty():
-            acciones_temporales.append(acciones.get())
-        
-        # Iterar sobre la lista temporal y reconstruir la PriorityQueue
-        for prioridad, accion in acciones_temporales:
-            try:
-                # Intentamos aplicar la acción al estado actual
-                estado_sucesor = nodo.estado.aplicarAccion(accion)
-                nuevo_nodo = Nodo(
-                    estado=estado_sucesor,
-                    padre=nodo,
-                    coste=nodo.coste + accion.coste,
-                    profundidad=nodo.profundidad + 1,
-                    generado=nodo.generado + 1
-                )
-                sucesores.append(nuevo_nodo)
-            except Exception:
-                # En caso de que no se pueda aplicar la acción, ignorarla
-                pass
-            finally:
-                # Restaurar la acción en la PriorityQueue original
-                acciones.put((prioridad, accion))
+            accion = acciones.get()[1]
+            accion_sucesor = nodo.estado.aplicarAccion(accion)
+            nuevo_nodo = Nodo(
+                self.problema.intersecciones[accion_sucesor],
+                padre=nodo,
+                coste=nodo.coste + accion.coste,
+                profundidad=nodo.profundidad + 1,
+                generado=nodo.generado + 1
+            )
+            sucesores.append(nuevo_nodo)
         
         return sucesores
 
@@ -186,10 +176,8 @@ class Heuristica(ABC):
     def __init__(self, problema):
         self.problema = problema
         #Obtenemos la lat y lon del estado objetivo
-        self.lat_objetivo = self.problema.intersecciones[self.problema.estado_objetivo]["latitude"]
-        self.lon_objetivo = self.problema.intersecciones[self.problema.estado_objetivo]["longitude"]
-
-
+        self.lat_objetivo = self.problema.estado_objetivo.latitud
+        self.lon_objetivo = self.problema.estado_objetivo.longitud
     def getHeutistica(self, estado):
         pass
 
@@ -200,8 +188,8 @@ class Heuristica_Geodesica(Heuristica):
     def getHeutistica(self, estado):
         # Obtener la intersección actual del estado
         # Calcular la distancia entre el estado actual y el estado objetivo
-        lat_actual = self.problema.intersecciones[estado.interseccion]["latitude"]
-        lon_actual = self.problema.intersecciones[estado.interseccion]["longitude"]
+        lat_actual = self.problema.intersecciones[estado.interseccion].latitud
+        lon_actual = self.problema.intersecciones[estado.interseccion].longitud
 
         #Formula para el calculo de la distancia geodesica
         distancia = geodesic((lat_actual, lon_actual), (self.lat_objetivo, self.lon_objetivo)).kilometers * 1000
@@ -215,8 +203,8 @@ class Heuristica_Euclides(Heuristica):
     def getHeutistica(self, estado):
         # Obtener la intersección actual del estado
         # Calcular la distancia entre el estado actual y el estado objetivo
-        lat_actual = self.problema.intersecciones[estado.interseccion]["latitude"]
-        lon_actual = self.problema.intersecciones[estado.interseccion]["longitude"]
+        lat_actual = self.problema.intersecciones[estado.interseccion].latitud
+        lon_actual = self.problema.intersecciones[estado.interseccion].longitud
 
 
         # Formula para el calculo de la distancia eucladiana

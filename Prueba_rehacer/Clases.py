@@ -17,25 +17,22 @@ class Accion:
     
 class Estado:
 
-    def __init__(self, interseccion):
+    def __init__(self, interseccion, latitud, longitud):
         self.interseccion = interseccion
+        self.latitud = latitud
+        self.longitud = longitud
 
     def __eq__(self, other):
         return self.interseccion == other.interseccion
     
     def aplicarAccion(self, accion):
         if self.interseccion == accion.origen:
-            return Estado(accion.destino)
+            return accion.destino
         raise Exception("No se puede aplicar la acción")
 
 class Nodo:
-
-
     def __init__(self, estado, padre=None, coste = 0, profundidad = 0, generado = 1):
-        if isinstance(estado, Estado):
-            self.estado = estado
-        else:
-            self.estado = Estado(estado)
+        self.estado = estado
         self.padre = padre
         self.coste = coste
         self.profundidad = profundidad
@@ -60,15 +57,13 @@ class Problema:
             self.datos_json = json.load(archivo)
 
         self.distancia = self.datos_json["distance"]
-        
-        self.estado_inicial = self.datos_json["initial"]
-        self.estado_objetivo = self.datos_json["final"]
         self.veloMax = 0
 
         self.intersecciones = {}
         self.acciones = {}
         for dato in self.datos_json["intersections"]:
-            self.intersecciones[dato["identifier"]] = dato
+            estado = Estado(dato["identifier"], dato["latitude"], dato["longitude"])
+            self.intersecciones[dato["identifier"]] = estado
             self.acciones[dato["identifier"]] = PriorityQueue()
 
         for segmento in self.datos_json["segments"]:
@@ -78,12 +73,15 @@ class Problema:
                 self.veloMax = segmento["speed"]
 
         self.veloMax = self.veloMax * (10/36)
+
+        self.estado_inicial = self.intersecciones[self.datos_json["initial"]]
+        self.estado_objetivo = self.intersecciones[self.datos_json["final"]]
     
 
     def getAcciones(self, estado):
-        return self.acciones[estado.interseccion]
+        return self.acciones[estado.interseccion].queue
 
     def esObjetivo(self, estado):
-        return estado.interseccion == self.estado_objetivo
+        return estado.interseccion == self.estado_objetivo.interseccion
     
     
