@@ -52,7 +52,7 @@ class Busqueda(ABC):
             print(f"Tiempo de ejecuccion: {self.formatoTiempo(self.tiempo_ejecucion)}")
             print(f"Profundidad de la solución: {self.profundidad_sol}")
             print(f"Coste: {self.formatoTiempo(self.coste_sol)}")
-            #print("Solución encontrada:", self.formatoSolucion(self.solucion))
+            print("Solución encontrada:", self.formatoSolucion(self.solucion))
         else:
             print("\n\nNo se encontró solución.")
 
