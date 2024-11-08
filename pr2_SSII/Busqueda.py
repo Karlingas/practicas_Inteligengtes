@@ -118,7 +118,7 @@ class Busqueda_a_estrella(Busqueda):
         self.heuristica = Heuristica_Geodesica(problema)
 
     def insertarNodo(self, nodo, frontera):
-        final = self.heuristica.getHeutistica(nodo.estado) / self.problema.veloMax
+        final = self.heuristica.getHeuristica(nodo.estado) / self.problema.veloMax
         nodo.heuristica =  nodo.coste + final 
         frontera.put(((nodo.heuristica), nodo))
 
@@ -134,14 +134,14 @@ class Heuristica(ABC):
         #Obtenemos la lat y lon del estado objetivo
         self.lat_objetivo = self.problema.estado_objetivo.latitud
         self.lon_objetivo = self.problema.estado_objetivo.longitud
-    def getHeutistica(self, estado):
+    def getHeuristica(self, estado):
         pass
 
 class Heuristica_Geodesica(Heuristica):
     def __init__(self, problema):
         super().__init__(problema)
 
-    def getHeutistica(self, estado):
+    def getHeuristica(self, estado):
         # Obtener la intersección actual del estado
         # Calcular la distancia entre el estado actual y el estado objetivo
         lat_actual = self.problema.intersecciones[estado.interseccion].latitud
@@ -152,11 +152,10 @@ class Heuristica_Geodesica(Heuristica):
 
         return distancia
 
-class Heuristica_Euclides(Heuristica):
     def __init__(self, problema):
         super().__init__(problema)
 
-    def getHeutistica(self, estado):
+    def getHeuristica(self, estado):
         # Obtener la intersección actual del estado
         # Calcular la distancia entre el estado actual y el estado objetivo
         lat_actual = self.problema.intersecciones[estado.interseccion].latitud
