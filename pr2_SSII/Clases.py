@@ -59,6 +59,40 @@ class Problema:
         self.veloMax = 0
 
         self.intersecciones = {}
+        self.acciones = {} #Diccionario de acciones
+       # Combinar ambos bucles en uno
+        for dato in self.datos_json["intersections"] + self.datos_json["segments"]:
+            if "identifier" in dato:  # Procesar intersección
+                estado = Estado(dato["identifier"], dato["latitude"], dato["longitude"])
+                self.intersecciones[dato["identifier"]] = estado
+                self.acciones[dato["identifier"]] = PriorityQueue()
+            elif "origin" in dato:  # Procesar segmento
+                accion = Accion(dato["origin"], dato["destination"], (dato["distance"]/(dato["speed"]*(10/36))))
+                self.acciones[dato["origin"]].put((accion.destino, accion))
+                if dato["speed"] > self.veloMax:
+                    self.veloMax = dato["speed"]
+
+        self.veloMax = self.veloMax * (10/36)
+
+        self.estado_inicial = self.intersecciones[self.datos_json["initial"]]
+        self.estado_objetivo = self.intersecciones[self.datos_json["final"]]
+    
+
+    def getAcciones(self, estado):
+        return self.acciones[estado.interseccion]
+
+    def esObjetivo(self, estado):
+        return estado.interseccion == self.estado_objetivo.interseccion
+
+class ProblemaGeneral:
+    def _init(self,ruta):
+        with open(ruta, 'r') as archivo:
+            self.datos_json = json.load(archivo)
+
+        self.distancia = self.datos_json["distance"]
+        self.veloMax = 0
+
+        self.intersecciones = {}
         self.acciones = {}
         for dato in self.datos_json["intersections"]:
             estado = Estado(dato["identifier"], dato["latitude"], dato["longitude"])
@@ -75,12 +109,5 @@ class Problema:
 
         self.estado_inicial = self.intersecciones[self.datos_json["initial"]]
         self.estado_objetivo = self.intersecciones[self.datos_json["final"]]
-    
-
-    def getAcciones(self, estado):
-        return self.acciones[estado.interseccion].queue
-
-    def esObjetivo(self, estado):
-        return estado.interseccion == self.estado_objetivo.interseccion
     
     

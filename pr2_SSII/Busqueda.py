@@ -61,8 +61,7 @@ class Busqueda(ABC):
     def expandir(self, nodo):
         sucesores = []
         acciones = PriorityQueue()
-        acciones.queue = copy.deepcopy(self.problema.getAcciones(nodo.estado)) 
-        #Por alguna razon, si no hago copia, se elimina la queue de problema
+        acciones = self.problema.getAcciones(nodo.estado) 
 
         while not acciones.empty():
             accion = acciones.get()[1]
@@ -75,7 +74,9 @@ class Busqueda(ABC):
                 generado=nodo.generado + 1
             )
             sucesores.append(nuevo_nodo)
-        
+            self.insertarNodo(nuevo_nodo, self.frontera)
+            self.nodos_generados += 1
+    
         return sucesores
 
     
@@ -87,29 +88,25 @@ class Busqueda(ABC):
 
         while not self.esVacio(self.frontera):
             nodo = self.extraerNodo(self.frontera)
-            if nodo.estado.interseccion in self.nodos_cerrados:
-                continue
+            if nodo.estado.interseccion not in self.nodos_cerrados:
+                if self.problema.esObjetivo(nodo.estado):
+                    self.tiempo_ejecucion = time.perf_counter() - inicio
+                    self.hay_sol = True
+                    self.profundidad_sol = nodo.profundidad
+                    self.coste_sol = nodo.coste
+                    self.solucion = nodo.getSolucion()
+                    self.imprimirEstadisticas()
+                    return self.solucion
+                
+                #Ha sido explorado y no es solucion
+                self.nodos_expandidos += 1
+                self.nodos_cerrados.add(nodo.estado.interseccion)
+                #expandimos
+                sucesores = self.expandir(nodo)
 
-            if self.problema.esObjetivo(nodo.estado):
-                self.tiempo_ejecucion = time.perf_counter() - inicio
-                self.hay_sol = True
-                self.profundidad_sol = nodo.profundidad
-                self.coste_sol = nodo.coste
-                self.solucion = nodo.getSolucion()
-                return self.imprimirEstadisticas()
             
-            #Ha sido explorado y no es solucion
-            self.nodos_expandidos += 1
-            self.nodos_cerrados.add(nodo.estado.interseccion)
-            #expandimos
-            sucesores = self.expandir(nodo)
-
-            for sucesor in sucesores:
-                self.insertarNodo(sucesor, self.frontera)
-                self.nodos_generados += 1
-            
-        
-        return self.imprimirEstadisticas()
+        self.imprimirEstadisticas()
+        return self.solucion
 
 class Busqueda_a_estrella(Busqueda):
     def __init__(self, problema):
@@ -134,6 +131,7 @@ class Heuristica(ABC):
         #Obtenemos la lat y lon del estado objetivo
         self.lat_objetivo = self.problema.estado_objetivo.latitud
         self.lon_objetivo = self.problema.estado_objetivo.longitud
+    @abstractmethod
     def getHeuristica(self, estado):
         pass
 
@@ -148,7 +146,7 @@ class Heuristica_Geodesica(Heuristica):
         lon_actual = self.problema.intersecciones[estado.interseccion].longitud
 
         #Formula para el calculo de la distancia geodesica
-        distancia = geodesic((lat_actual, lon_actual), (self.lat_objetivo, self.lon_objetivo)).kilometers * 1000
+        distancia = geodesic((lat_actual, lon_actual), (self.lat_objetivo, self.lon_objetivo)).meters
 
         return distancia
 
