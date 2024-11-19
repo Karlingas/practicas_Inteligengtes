@@ -63,7 +63,6 @@ class Busqueda(ABC):
     #Metodos para la busqueda
 
     def expandir(self, nodo):
-        acciones = PriorityQueue()
         acciones = self.problema.getAcciones(nodo.estado) 
 
         while not acciones.empty():
@@ -157,16 +156,55 @@ class Heuristica_Geodesica(Heuristica):
         return distancia
 
 
+
 class Busqueda_Aleatoria():
-    def __init__(self,problema):
+    def __init__(self,problema, generaciones = 1):
         self.problema = problema
-        self.candidatos = self.problema.candidatos
-        self.candidato_ini = self.candidatos[random(0,len(self.candidatos))]
-        
+        self.listaCandidatos = self.problema.candidatos
+        self.soluciones = []
+
+        self.candidatos = []
+
+        for candi in self.listaCandidatos:
+            self.soluciones.append(0)
+
+        for i in range(generaciones):
+            tempo = random.sample(list(self.listaCandidatos), self.problema.estaciones)
+            print(tempo)
+            for j in range(len(tempo)):
+                self.soluciones[self.listaCandidatos.index(tempo[j])] = 1
+            self.candidatos.append(tempo)
+
 
         self.tiempo_ej = 0
 
+    def evaluaSolucion(self, solucion):
+        """
+        Evalúa la solución S usando la fórmula especificada:
+        value(S) = (1 / sum(C[i].pop)) * min_j(sum(C[i].pop * time(C[i].id, S[j])))
+        """
+        total_poblacion = sum([self.problema.datos_json["intersections"][i]["population"] 
+                               for i in range(len(self.problema.datos_json["intersections"]))])
+        
+        min_costo = float("inf")
+        for s in solucion:
+            costo_total = 0
+            for c in self.problema.datos_json["intersections"]:
+                poblacion = c["population"]
+                id_ciudad = c["identifier"]
+                
+                # Ejecutar A* para calcular el tiempo entre C[i].id y S[j]
+                busqueda_astar = Busqueda_a_estrella(self.problema, id_ciudad, s)
+                tiempo = busqueda_astar.busqueda()
+                
+                costo_total += poblacion * tiempo
+            
+            min_costo = min(min_costo, costo_total)
+
+        value_s = (1 / total_poblacion) * min_costo
+        return value_s
+
     def busqueda(self):
-        inicio = time.perf_counter()
-        candidato = self.candidato_ini
-        while 
+        for i in range(len(self.candidatos)):
+            print("Candidato", self.candidatos[i])
+        print("Coste :", self.evaluaSolucion(self.candidatos[i]))

@@ -24,6 +24,9 @@ class Estado:
     def __eq__(self, other):
         return self.interseccion == other.interseccion
     
+    def __lt__(self, other):
+        return self.interseccion < other.interseccion
+    
     def aplicarAccion(self, accion):
         if self.interseccion == accion.origen:
             return accion.destino
@@ -47,7 +50,7 @@ class Nodo:
         return solucion
     
     def __lt__(self, other):
-        return self.generado < other.generado
+        return self.estado < other.estado
 
 class Problema:
     def __init__(self, ruta):
@@ -61,20 +64,21 @@ class Problema:
 
         self.intersecciones = {}
         self.acciones = {} #Diccionario de acciones
-        self.candidatos = {}
+        self.candidatos = []
        # Combinar ambos bucles en uno
-        for dato in self.datos_json["intersections"] + self.datos_json["segments"] + self.datos_json["candidates"]:
-            if "identifier" in dato:  # Procesar intersección
-                estado = Estado(dato["identifier"], dato["latitude"], dato["longitude"])
-                self.intersecciones[dato["identifier"]] = estado
-                self.acciones[dato["identifier"]] = PriorityQueue()
-            elif "origin" in dato:  # Procesar segmento
-                accion = Accion(dato["origin"], dato["destination"], (dato["distance"]/(dato["speed"]*(10/36))))
-                self.acciones[dato["origin"]].put((accion.destino, accion))
-                if dato["speed"] > self.veloMax:
+        for dato in self.datos_json["intersections"]:
+            estado = Estado(dato["identifier"], dato["latitude"], dato["longitude"])
+            self.intersecciones[dato["identifier"]] = estado
+            self.acciones[dato["identifier"]] = PriorityQueue()
+        
+        for dato in self.datos_json["segments"]:
+            accion = Accion(dato["origin"], dato["destination"], (dato["distance"]/(dato["speed"]*(10/36))))
+            self.acciones[dato["origin"]].put((accion.destino, accion))
+            if dato["speed"] > self.veloMax:
                     self.veloMax = dato["speed"]
-            else :
-                self.candidatos[dato[0]] = (dato[0],dato[1])
+        
+        for dato in self.datos_json["candidates"]:
+            self.candidatos.append(dato[0])
 
         self.veloMax = self.veloMax * (10/36)
 
