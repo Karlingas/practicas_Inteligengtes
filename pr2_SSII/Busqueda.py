@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from collections import deque
 import copy
+import random
 from Clases import *
 import time
 from queue import PriorityQueue
@@ -11,15 +12,18 @@ class Busqueda(ABC):
         self.problema = problema
         self.nodos_cerrados = set()
         self.frontera = None
+        self.inicio = None #esto es un identificador
+        self.final = None #y esto mas de lo mismo
 
         #Datos para las estadisticas
         self.tiempo_ejecucion = 0
-        self.nodos_generados = 0
-        self.nodos_expandidos = 0
-        self.profundidad_sol = 0
+        #self.nodos_generados = 0
+        #self.nodos_expandidos = 0
+        #self.profundidad_sol = 0
         self.coste_sol = 0
         self.hay_sol = False
-        self.solucion = []
+        #self.solucion = []
+    
     
     #Metodos implementados en las clases especificas
     @abstractmethod
@@ -41,10 +45,10 @@ class Busqueda(ABC):
         tiempo_formateado = f"{horas:01d}:{minutos:02d}:{segundos:02d}.{milisegundos:06d}"
         return tiempo_formateado
 
-    def formatoSolucion(self, solucion):
+    #def formatoSolucion(self, solucion):
         return [f"( {solucion[i]} -> {solucion[i + 1]} )" for i in range(len(solucion) - 1)]
 
-    def imprimirEstadisticas(self):
+    #def imprimirEstadisticas(self):
         if self.hay_sol:
             print("\nEstadísticas:")
             print(f"Nodos generados: {self.nodos_generados}")
@@ -59,7 +63,6 @@ class Busqueda(ABC):
     #Metodos para la busqueda
 
     def expandir(self, nodo):
-        sucesores = []
         acciones = PriorityQueue()
         acciones = self.problema.getAcciones(nodo.estado) 
 
@@ -73,46 +76,35 @@ class Busqueda(ABC):
                 profundidad=nodo.profundidad + 1,
                 generado=nodo.generado + 1
             )
-            sucesores.append(nuevo_nodo)
             self.insertarNodo(nuevo_nodo, self.frontera)
-            self.nodos_generados += 1
     
-        return sucesores
-
     
     def busqueda(self):
         inicio = time.perf_counter()
-        e_inicial = Nodo(self.problema.estado_inicial)
+        e_inicial = Nodo(self.inicio)
         self.insertarNodo(e_inicial, self.frontera)
-        #self.nodos_generados += 1
 
         while not self.esVacio(self.frontera):
             nodo = self.extraerNodo(self.frontera)
             if nodo.estado.interseccion not in self.nodos_cerrados:
-                if self.problema.esObjetivo(nodo.estado):
+                if nodo.estado.interseccion == self.final:
                     self.tiempo_ejecucion = time.perf_counter() - inicio
                     self.hay_sol = True
-                    self.profundidad_sol = nodo.profundidad
-                    self.coste_sol = nodo.coste
-                    self.solucion = nodo.getSolucion()
-                    self.imprimirEstadisticas()
-                    return self.solucion
+                    return nodo.coste
                 
-                #Ha sido explorado y no es solucion
-                self.nodos_expandidos += 1
                 self.nodos_cerrados.add(nodo.estado.interseccion)
-                #expandimos
-                sucesores = self.expandir(nodo)
+                self.expandir(nodo)
 
-            
-        self.imprimirEstadisticas()
-        return self.solucion
+
+        return 696969696969     #Por si no hay solucion un numero grande para el coste (mas d 2 cm)
 
 class Busqueda_a_estrella(Busqueda):
-    def __init__(self, problema):
+    def __init__(self, problema, inicial, final):
         super().__init__(problema)
         self.frontera = PriorityQueue()
         self.heuristica = Heuristica_Geodesica(problema)
+        self.inicio = inicial
+        self.final = final
 
     def insertarNodo(self, nodo, frontera):
         final = self.heuristica.getHeuristica(nodo.estado) / self.problema.veloMax
@@ -163,3 +155,18 @@ class Heuristica_Geodesica(Heuristica):
         # Formula para el calculo de la distancia eucladiana
         distancia = math.dist([lat_actual, lon_actual],[self.lat_objetivo, self.lon_objetivo])
         return distancia
+
+
+class Busqueda_Aleatoria():
+    def __init__(self,problema):
+        self.problema = problema
+        self.candidatos = self.problema.candidatos
+        self.candidato_ini = self.candidatos[random(0,len(self.candidatos))]
+        
+
+        self.tiempo_ej = 0
+
+    def busqueda(self):
+        inicio = time.perf_counter()
+        candidato = self.candidato_ini
+        while 

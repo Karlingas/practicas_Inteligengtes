@@ -56,12 +56,14 @@ class Problema:
             self.datos_json = json.load(archivo)
 
         self.distancia = self.datos_json["distance"]
+        self.estaciones = self.datos_json["number_stations"]
         self.veloMax = 0
 
         self.intersecciones = {}
         self.acciones = {} #Diccionario de acciones
+        self.candidatos = {}
        # Combinar ambos bucles en uno
-        for dato in self.datos_json["intersections"] + self.datos_json["segments"]:
+        for dato in self.datos_json["intersections"] + self.datos_json["segments"] + self.datos_json["candidates"]:
             if "identifier" in dato:  # Procesar intersección
                 estado = Estado(dato["identifier"], dato["latitude"], dato["longitude"])
                 self.intersecciones[dato["identifier"]] = estado
@@ -71,18 +73,23 @@ class Problema:
                 self.acciones[dato["origin"]].put((accion.destino, accion))
                 if dato["speed"] > self.veloMax:
                     self.veloMax = dato["speed"]
+            else :
+                self.candidatos[dato[0]] = (dato[0],dato[1])
 
         self.veloMax = self.veloMax * (10/36)
 
-        self.estado_inicial = self.intersecciones[self.datos_json["initial"]]
-        self.estado_objetivo = self.intersecciones[self.datos_json["final"]]
-    
 
     def getAcciones(self, estado):
         return self.acciones[estado.interseccion]
 
     def esObjetivo(self, estado):
         return estado.interseccion == self.estado_objetivo.interseccion
+
+
+
+
+
+
 
 class ProblemaGeneral:
     def _init(self,ruta):
