@@ -5,3 +5,4 @@
     Cambiar en a* el nombre del método getHeuristica
     Segmentos pasa a ser un diccionario de listas, en vez de PriorityQueue
     En la clase Problema hacer 3 for para crear los diccionarios
+

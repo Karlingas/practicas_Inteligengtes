@@ -1,3 +1,4 @@
+from functools import lru_cache
 import json
 import math
 from geopy.distance import geodesic
@@ -21,8 +22,6 @@ class Estado:
         self.latitud = latitud
         self.longitud = longitud
 
-    def __eq__(self, other):
-        return self.interseccion == other.interseccion
     
     def __lt__(self, other):
         return self.interseccion < other.interseccion
@@ -63,62 +62,33 @@ class Problema:
         self.veloMax = 0
 
         self.intersecciones = {}
-        self.acciones = {} #Diccionario de acciones
+        self.acciones = {}  # Diccionario de acciones
         self.candidatos = []
-       # Combinar ambos bucles en uno
+
         for dato in self.datos_json["intersections"]:
-            estado = Estado(dato["identifier"], dato["latitude"], dato["longitude"])
+            estado = Estado(dato["identifier"], dato["latitude"],
+                            dato["longitude"])
             self.intersecciones[dato["identifier"]] = estado
-            self.acciones[dato["identifier"]] = PriorityQueue()
-        
+            self.acciones[dato["identifier"]] = []  # Inicializar como lista vacía
+
         for dato in self.datos_json["segments"]:
-            accion = Accion(dato["origin"], dato["destination"], (dato["distance"]/(dato["speed"]*(10/36))))
-            self.acciones[dato["origin"]].put((accion.destino, accion))
+            accion = Accion(dato["origin"], dato["destination"],
+                            (dato["distance"] / (dato["speed"] * (10 / 36))))
+            self.acciones[dato["origin"]].append(accion)  # Añadir acción a la lista
             if dato["speed"] > self.veloMax:
-                    self.veloMax = dato["speed"]
-        
+                self.veloMax = dato["speed"]
+
         for dato in self.datos_json["candidates"]:
             self.candidatos.append(dato[0])
 
-        self.veloMax = self.veloMax * (10/36)
+        self.veloMax = self.veloMax * (10 / 36)
+        self.ordenarAcciones()  # Ordenar las acciones al crear el objeto
 
+    def ordenarAcciones(self):
+        for key in self.acciones:
+            self.acciones[key].sort(key=lambda accion: accion.destino)
 
+    @lru_cache(maxsize=4096)
     def getAcciones(self, estado):
         return self.acciones[estado.interseccion]
 
-    def esObjetivo(self, estado):
-        return estado.interseccion == self.estado_objetivo.interseccion
-
-
-
-
-
-
-
-class ProblemaGeneral:
-    def _init(self,ruta):
-        with open(ruta, 'r') as archivo:
-            self.datos_json = json.load(archivo)
-
-        self.distancia = self.datos_json["distance"]
-        self.veloMax = 0
-
-        self.intersecciones = {}
-        self.acciones = {}
-        for dato in self.datos_json["intersections"]:
-            estado = Estado(dato["identifier"], dato["latitude"], dato["longitude"])
-            self.intersecciones[dato["identifier"]] = estado
-            self.acciones[dato["identifier"]] = PriorityQueue()
-
-        for segmento in self.datos_json["segments"]:
-            accion = Accion(segmento["origin"], segmento["destination"], (segmento["distance"]/(segmento["speed"]*(10/36))))
-            self.acciones[segmento["origin"]].put((accion.destino, accion))
-            if segmento["speed"] > self.veloMax :
-                self.veloMax = segmento["speed"]
-
-        self.veloMax = self.veloMax * (10/36)
-
-        self.estado_inicial = self.intersecciones[self.datos_json["initial"]]
-        self.estado_objetivo = self.intersecciones[self.datos_json["final"]]
-    
-    
