@@ -157,15 +157,16 @@ class Busqueda_Aleatoria():
     def evaluaSolucion(self, solucion):
         tiempo = time.perf_counter()
         costeSol = 0
-        costeInd = 0
         for candidato in solucion:
+            costeInd = 0
+            poblacionCandidato = candidato[1]
             for inter in self.problema.intersecciones:
                 inicial = self.problema.intersecciones[inter]
-                final = self.problema.intersecciones[candidato]
+                final = self.problema.intersecciones[candidato[0]]
                 coste = self.aEstrellita(self.problema, inicial, final)
-                costeInd += coste
-            costeSol += costeInd 
-            costeInd = 0
+                costeInd += coste *poblacionCandidato #el coste de cada individuo tiene que estar relacionado con la poblacion del mismo
+            costeSol += 1 / costeInd #nos interesa saber cual sera el mas bajo
+            
 
         tiempoej = time.perf_counter() - tiempo
 
@@ -189,3 +190,105 @@ class Busqueda_Aleatoria():
     @lru_cache(maxsize=4096)
     def aEstrellita(self, problema, inicial, final):
         return Busqueda_a_estrella(problema, inicial, final).busqueda()
+
+class Busqueda_Genetica():
+    def __init__(self, problema, individuos, generaciones, tamanoTorneo = 2):
+        self.problema = problema #Problema a resolver
+
+        self.individuos = individuos #Numero de individuos en la poblacion, un individuo estara formado por n intersecciones candidatas (n siendo numero de estaciones)
+        self.poblacion = [] #Una poblacion formada por n individuos (soluciones que vamos a evaluar)
+        self.generaciones = generaciones #Numero de generaciones que vamos a hacer (condicion de parada)
+
+        #self.tamIndi = self.problema.estaciones #Tamaño de cada individuo (numero de estaciones)
+        self.tamTorneo = tamanoTorneo #Tamaño del torneo
+
+
+    def inicializacion(self):
+        # Para la inicializacion cogeremos n individuos de tamIndi
+        for _ in range(self.individuos):  # Cambiado i por _ ya que no se usa el índice
+            # Creamos un individuo
+            individuo = random.sample(list(self.problema.candidatos), self.problema.estaciones)
+            self.poblacion.append([individuo, 0])  # Usar una lista en lugar de una tupla
+            
+
+    def evaluacion(self):
+        #Evaluamos cada individuo de la poblacion
+        for individuo in self.poblacion:
+            #evaluamos cada interseccion candidata del individuo
+            for candidato in individuo[0]:
+                #cada candidato se evalua con a* de todos los puntos a el
+                costeIndv = 0
+                poblacionCandidato = candidato[1]
+                for inter in self.problema.intersecciones:
+                    inicial = self.problema.intersecciones[inter]
+                    final = self.problema.intersecciones[candidato[0]]
+                    coste = Busqueda_a_estrella(self.problema, inicial, final).busqueda()
+                    costeIndv += coste * poblacionCandidato
+            
+            individuo[1] += 1/costeIndv
+
+    def seleccion(self):
+        #Para la seleccion de individuos que resultaran en la proxima generacion
+        #Vamos a usar el metodo de torneo
+        nueva_poblacion = []
+        for i in range(self.individuos):
+            luchadores = random.sample(self.poblacion, self.tamTorneo) #jaja, luchadores, es un torneo
+            luchadores.sort(key=lambda x: x[1])
+            nueva_poblacion.append(luchadores[0])
+        self.poblacion = nueva_poblacion
+    
+    def cruce(self):
+        # Para el cruce, vamos a usar el cruce de un punto
+        # con una probabilidad de cruce del 80%
+        nueva_poblacion = []
+        for i in range(0, self.individuos, 2):  # Iterar sobre parejas gays de padres
+            padre1 = self.poblacion[i][0]
+            padre2 = self.poblacion[i+1][0]
+            if random.random() < 0.8:  # Aplicar cruce con probabilidad del 80%
+                punto_cruce = random.randint(1, self.problema.estaciones - 1)  # Elegir punto de cruce aka punto donde empieza uno y acaba otro
+                hijo1 = padre1[:punto_cruce] + padre2[punto_cruce:]
+                hijo2 = padre2[:punto_cruce] + padre1[punto_cruce:]
+                nueva_poblacion.append([hijo1, 0])
+                nueva_poblacion.append([hijo2, 0])
+            else:  # No aplicar cruce, copiar los padres
+                nueva_poblacion.append([padre1, 0])
+                nueva_poblacion.append([padre2, 0])
+        self.poblacion = nueva_poblacion  # Actualizar la población
+
+    def mutacion(self):
+        # Para la mutación, vamos a cambiar una intersección aleatoria de cada individuo
+        # con una probabilidad de mutación del 1%
+        for individuo in self.poblacion:
+            for i in range(self.problema.estaciones):
+                if random.random() < 0.01:  # Aplicar mutación con probabilidad del 1%
+                    # Obtener una nueva intersección aleatoria que no esté ya en el individuo
+                    nueva_interseccion = random.choice(list(set(self.problema.candidatos) - set(individuo[0])))  #gracias a mi compa (asiq ni idea si esta bien)
+                    individuo[0][i] = nueva_interseccion  # Reemplazar la intersección
+
+    def reemplazo(self):
+        # supongo que no hacemos nada portque ya reemplazo las mutaciones en mutacion
+        pass
+
+    def busqueda(self):
+        tiempo = time.perf_counter()
+        # Primero inicializamos la población
+        self.inicializacion()
+        for i in range(self.generaciones):  # Iterar sobre las generaciones
+            #imprimir el numero de la generacion
+            self.evaluacion()
+            print(f"Generacion {i+1}")
+            tiempogen = time.perf_counter() - tiempo
+            print(Busqueda.formatoTiempo(self, tiempogen))
+            #imprimimos el mejor de la generacion con su coste
+            mejor_solucion = max(self.poblacion, key=lambda x: x[1])
+            print(f"Mejor solucion: {mejor_solucion[1]}")
+            self.seleccion()
+            self.cruce()
+            self.mutacion()
+            # No es necesario llamar a reemplazo() ya que se hace en la selección
+
+        # Obtener la mejor solución de la población final
+        tiempo_ej = time.perf_counter() - tiempo
+        print(Busqueda.formatoTiempo(self, tiempo_ej))
+        mejor_solucion = max(self.poblacion, key=lambda x: x[1])
+        return mejor_solucion[0]  # Devolver solo la lista de intersecci

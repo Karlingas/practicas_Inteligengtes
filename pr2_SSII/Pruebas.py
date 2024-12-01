@@ -1,14 +1,9 @@
 from Clases import *
 from Busqueda import *
-ruta_json = r'/Users/diego/Documents/GitHub/practicas_Inteligengtes/pr2_SSII/sample-problems-lab2/small/calle_agustina_aroca_albacete_250_0_candidates_75_ns_7.json'
+ruta_json = r'/Users/diego/Documents/GitHub/practicas_Inteligengtes/pr2_SSII/sample-problems-lab2/toy/calle_del_virrey_morcillo_albacete_250_3_candidates_15_ns_4.json'
 
 problema = Problema(ruta_json)
 
 #a estrella
-alea = Busqueda_Aleatoria(problema, 10)
-
-soluciones = alea.busqueda()
-
-for sol in soluciones:
-    print(sol)
+print(Busqueda_Genetica(problema,2,100,2).busqueda())
 

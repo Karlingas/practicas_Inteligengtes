@@ -79,7 +79,7 @@ class Problema:
                 self.veloMax = dato["speed"]
 
         for dato in self.datos_json["candidates"]:
-            self.candidatos.append(dato[0])
+            self.candidatos.append((dato[0], dato[1]))
 
         self.veloMax = self.veloMax * (10 / 36)
         self.ordenarAcciones()  # Ordenar las acciones al crear el objeto

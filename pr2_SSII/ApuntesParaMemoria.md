@@ -6,3 +6,4 @@
     Segmentos pasa a ser un diccionario de listas, en vez de PriorityQueue
     En la clase Problema hacer 3 for para crear los diccionarios
 
+en la clase problema, los candidatos tenemos en cuenta su poblacion
