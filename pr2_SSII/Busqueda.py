@@ -201,7 +201,12 @@ class Busqueda_Genetica():
 
         #self.tamIndi = self.problema.estaciones #Tamaño de cada individuo (numero de estaciones)
         self.tamTorneo = tamanoTorneo #Tamaño del torneo
+        self.mejorIndividuo = None
 
+    @lru_cache(maxsize=139487)
+    def aestrellita(self, problema, inicial, final):
+        return Busqueda_a_estrella(problema, inicial, final).busqueda()
+    
 
     def inicializacion(self):
         # Para la inicializacion cogeremos n individuos de tamIndi
@@ -209,6 +214,8 @@ class Busqueda_Genetica():
             # Creamos un individuo
             individuo = random.sample(list(self.problema.candidatos), self.problema.estaciones)
             self.poblacion.append([individuo, 0])  # Usar una lista en lugar de una tupla
+        
+        self.evaluacion()
             
 
     def evaluacion(self):
@@ -222,10 +229,12 @@ class Busqueda_Genetica():
                 for inter in self.problema.intersecciones:
                     inicial = self.problema.intersecciones[inter]
                     final = self.problema.intersecciones[candidato[0]]
-                    coste = Busqueda_a_estrella(self.problema, inicial, final).busqueda()
+                    coste = self.aestrellita(self.problema, inicial, final)
                     costeIndv += coste * poblacionCandidato
             
             individuo[1] += 1/costeIndv
+
+            self.mejorIndividuo = max(self.poblacion, key=lambda x: x[1])
 
     def seleccion(self):
         #Para la seleccion de individuos que resultaran en la proxima generacion
@@ -272,16 +281,18 @@ class Busqueda_Genetica():
     def busqueda(self):
         tiempo = time.perf_counter()
         # Primero inicializamos la población
+        mejores = []
         self.inicializacion()
         for i in range(self.generaciones):  # Iterar sobre las generaciones
-            #imprimir el numero de la generacion
-            self.evaluacion()
-            print(f"Generacion {i+1}")
+
+            #print(f"Generacion {i+1}")
             tiempogen = time.perf_counter() - tiempo
-            print(Busqueda.formatoTiempo(self, tiempogen))
+            #print(Busqueda.formatoTiempo(self, tiempogen))
             #imprimimos el mejor de la generacion con su coste
             mejor_solucion = max(self.poblacion, key=lambda x: x[1])
-            print(f"Mejor solucion: {mejor_solucion[1]}")
+            mejores.append(mejor_solucion[1])
+            #print(f"Mejor solucion: {mejor_solucion[1]}")
+
             self.seleccion()
             self.cruce()
             self.mutacion()
@@ -291,4 +302,4 @@ class Busqueda_Genetica():
         tiempo_ej = time.perf_counter() - tiempo
         print(Busqueda.formatoTiempo(self, tiempo_ej))
         mejor_solucion = max(self.poblacion, key=lambda x: x[1])
-        return mejor_solucion[0]  # Devolver solo la lista de intersecci
+        return mejores # Devolver solo la lista de intersecci
