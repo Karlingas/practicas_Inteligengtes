@@ -192,7 +192,7 @@ class Busqueda_Aleatoria():
         return Busqueda_a_estrella(problema, inicial, final).busqueda()
 
 class Busqueda_Genetica():
-    def __init__(self, problema, individuos, generaciones, tamanoTorneo = 2):
+    def __init__(self, problema, individuos, generaciones, tamanoTorneo = 2, elitismo = 1):
         self.problema = problema #Problema a resolver
 
         self.individuos = individuos #Numero de individuos en la poblacion, un individuo estara formado por n intersecciones candidatas (n siendo numero de estaciones)
@@ -201,6 +201,7 @@ class Busqueda_Genetica():
 
         #self.tamIndi = self.problema.estaciones #Tamaño de cada individuo (numero de estaciones)
         self.tamTorneo = tamanoTorneo #Tamaño del torneo
+        self.elitismo = elitismo  # Número de individuos a preservar mediante elitismo
         self.mejorIndividuo = None
 
     @lru_cache(maxsize=139487)
@@ -212,7 +213,7 @@ class Busqueda_Genetica():
         # Para la inicializacion cogeremos n individuos de tamIndi
         for _ in range(self.individuos):  # Cambiado i por _ ya que no se usa el índice
             # Creamos un individuo
-            individuo = random.sample(list(self.problema.candidatos), self.problema.estaciones)
+            individuo = random.sample(list(self.problema.candidatos), self.problema.estaciones) # Cogemos tantos candidatos como estaciones haya
             self.poblacion.append([individuo, 0])  # Usar una lista en lugar de una tupla
         
         self.evaluacion()
@@ -232,7 +233,7 @@ class Busqueda_Genetica():
                     coste = self.aestrellita(self.problema, inicial, final)
                     costeIndv += coste * poblacionCandidato
             
-            individuo[1] += 1/costeIndv
+            individuo[1] += 1/costeIndv # Esto es el fitness creo (1/costeIndv) 
 
             self.mejorIndividuo = max(self.poblacion, key=lambda x: x[1])
 
@@ -275,8 +276,15 @@ class Busqueda_Genetica():
                     individuo[0][i] = nueva_interseccion  # Reemplazar la intersección
 
     def reemplazo(self):
-        # supongo que no hacemos nada portque ya reemplazo las mutaciones en mutacion
-        pass
+        """
+        Reemplazo con elitismo: Los mejores individuos se preservan automáticamente,
+        el resto de la población se sustituye con nuevos individuos generados.
+        """
+        # Seleccionamos los mejores individuos (según el atributo de aptitud)
+        elite = sorted(self.poblacion, key=lambda x: x[1], reverse=True)[:self.elitismo]
+        
+        # Actualizamos la población actual manteniendo los mejores
+        self.poblacion = elite + self.poblacion[:self.individuos - self.elitismo]
 
     def busqueda(self):
         tiempo = time.perf_counter()
@@ -296,6 +304,7 @@ class Busqueda_Genetica():
             self.seleccion()
             self.cruce()
             self.mutacion()
+            self.reemplazo()  # Reemplazo con elitismo
             # No es necesario llamar a reemplazo() ya que se hace en la selección
 
         # Obtener la mejor solución de la población final

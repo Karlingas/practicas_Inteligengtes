@@ -1,16 +1,17 @@
 from Clases import *
 from Busqueda import *
 import matplotlib.pyplot as plt
-ruta_json = r'/Users/diego/Documents/GitHub/practicas_Inteligengtes/pr2_SSII/sample-problems-lab2/medium/calle_agustina_aroca_albacete_500_1_candidates_89_ns_22.json'
+ruta_json = r'pr2_SSII\sample-problems-lab2\toy\calle_del_virrey_morcillo_albacete_250_3_candidates_15_ns_4.json'
 
 problema = Problema(ruta_json)
-
+valores = Busqueda_Aleatoria(problema,1000).busqueda()
+print(valores)
 #a estrella
-valores = Busqueda_Genetica(problema,10,5,4).busqueda()
+valores = Busqueda_Genetica(problema,8,10,4,2).busqueda()
 
-
+print(valores)
 # Dibujar la gráfica
-plt.plot(valores)
+#plt.plot(valores)
 
 # Mostrar la gráfica
-plt.show()
+#plt.show()
