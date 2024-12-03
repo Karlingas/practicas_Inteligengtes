@@ -237,7 +237,7 @@ class Busqueda_Genetica():
 
             self.mejorIndividuo = max(self.poblacion, key=lambda x: x[1])
 
-    def seleccion(self):
+    def seleccionTorneo(self):
         #Para la seleccion de individuos que resultaran en la proxima generacion
         #Vamos a usar el metodo de torneo
         nueva_poblacion = []
@@ -247,6 +247,58 @@ class Busqueda_Genetica():
             nueva_poblacion.append(luchadores[0])
         self.poblacion = nueva_poblacion
     
+    def seleccionProporcionalFitness(self):
+        # Usamos selección proporcional al fitness (ruleta)
+        nueva_poblacion = []
+        
+        # Sumar los fitness de todos los individuos
+        total_fitness = sum(individuo[1] for individuo in self.poblacion)
+        
+        # Normalizar los fitness para evitar valores extremos
+        if total_fitness == 0:
+            raise ValueError("El fitness total es 0, lo que sugiere que todos los individuos tienen un fitness muy bajo.")
+        
+        for _ in range(self.individuos):
+            # Generar un número aleatorio en el rango del fitness acumulado
+            punto_ruleta = random.uniform(0, total_fitness)
+            suma_acumulada = 0
+            
+            # Selección del individuo basado en el fitness acumulado
+            for individuo in self.poblacion:
+                suma_acumulada += individuo[1]
+                if suma_acumulada >= punto_ruleta:
+                    nueva_poblacion.append(individuo)
+                    break
+        
+        self.poblacion = nueva_poblacion
+
+    def seleccionRango(self):
+        # Ordenar la población por fitness en orden descendente
+        # (mejor individuo primero)
+        self.poblacion.sort(key=lambda x: x[1], reverse=True)
+        
+        # Asignar pesos en función del rango
+        num_individuos = len(self.poblacion)
+        pesos = [num_individuos - i for i in range(num_individuos)]  # Peso más alto para el mejor individuo
+        
+        # Calcular el total de los pesos para normalización
+        total_pesos = sum(pesos)
+        
+        nueva_poblacion = []
+        for _ in range(self.individuos):
+            # Generar un número aleatorio en el rango de los pesos totales
+            punto_ruleta = random.uniform(0, total_pesos)
+            suma_acumulada = 0
+            
+            # Seleccionar individuo basado en la acumulación de pesos
+            for i, individuo in enumerate(self.poblacion):
+                suma_acumulada += pesos[i]
+                if suma_acumulada >= punto_ruleta:
+                    nueva_poblacion.append(individuo)
+                    break
+        
+        self.poblacion = nueva_poblacion
+
     def cruce(self):
         # Para el cruce, vamos a usar el cruce de un punto
         # con una probabilidad de cruce del 80%
@@ -301,7 +353,7 @@ class Busqueda_Genetica():
             mejores.append(mejor_solucion[1])
             #print(f"Mejor solucion: {mejor_solucion[1]}")
 
-            self.seleccion()
+            self.seleccionRango()
             self.cruce()
             self.mutacion()
             self.evaluacion()

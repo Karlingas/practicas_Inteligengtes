@@ -7,7 +7,7 @@ problema = Problema(ruta_json)
 valores = Busqueda_Aleatoria(problema,1000).busqueda()
 print(valores)
 #a estrella
-valores = Busqueda_Genetica(problema,30,100,2,100).busqueda()
+valores = Busqueda_Genetica(problema,6,1000,2,10).busqueda()
 
 print(valores)
 # Dibujar la gráfica
