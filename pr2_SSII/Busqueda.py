@@ -304,6 +304,7 @@ class Busqueda_Genetica():
             self.seleccion()
             self.cruce()
             self.mutacion()
+            self.evaluacion()
             self.reemplazo()  # Reemplazo con elitismo
             # No es necesario llamar a reemplazo() ya que se hace en la selección
 
@@ -311,4 +312,5 @@ class Busqueda_Genetica():
         tiempo_ej = time.perf_counter() - tiempo
         print(Busqueda.formatoTiempo(self, tiempo_ej))
         mejor_solucion = max(self.poblacion, key=lambda x: x[1])
+        print(f"Mejor solucion: {mejor_solucion[1]}")
         return mejores # Devolver solo la lista de intersecci
