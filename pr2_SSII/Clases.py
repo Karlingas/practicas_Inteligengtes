@@ -88,7 +88,16 @@ class Problema:
         for key in self.acciones:
             self.acciones[key].sort(key=lambda accion: accion.destino)
 
-    @lru_cache(maxsize=4096)
+    @lru_cache(maxsize=100000)
     def getAcciones(self, estado):
         return self.acciones[estado.interseccion]
 
+class Individuo:
+    def __init__(self, genes):
+        self.genes = genes 
+    
+    def __lt__(self, other):
+        return self.fitness < other.fitness
+    
+    def __eq__(self, other):
+        return self.soluciones == other.soluciones
