@@ -221,7 +221,10 @@ class Busqueda_Genetica():
     def __init__(self, problema, individuos, generaciones, tamanoTorneo = 2, elitismo = 1):
         self.problema = problema #Problema a resolver
 
-        self.individuos = individuos #Numero de individuos en la poblacion, un individuo estara formado por n intersecciones candidatas (n siendo numero de estaciones)
+        if individuos%2 == 0:
+            self.individuos = individuos #Numero de individuos en la poblacion, un individuo estara formado por n intersecciones candidatas (n siendo numero de estaciones)
+        else :
+            self.individuos = individuos + 1
         self.generaciones = generaciones #Numero de generaciones que vamos a hacer (condicion de parada)
         self.poblacion = [None] * individuos #Una poblacion formada por n individuos (soluciones que vamos a evaluar)
         
