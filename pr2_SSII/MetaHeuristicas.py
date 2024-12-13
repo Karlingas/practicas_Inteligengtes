@@ -102,29 +102,36 @@ class BusquedaGenetica():
                 self.mejorIndividuo = self.poblacion[i]
     
     def evaluaIndividuo(self, individuo):
-        pobTotal = 0
         valor = 0
-        for candidata in range(len(self.problema.candidatos)):
-            minimo = math.inf
-            pobCandi = self.problema.candidatos[candidata][1]
-            pobTotal += pobCandi
+        pobTotal = 0  # Inicializa el total de población en 0
 
-            inicio = self.problema.intersecciones[self.problema.candidatos[candidata][0]]
-            for seleccionada in range(len(individuo)):
-                if (self.problema.candidatos[candidata][0], individuo[seleccionada][0]) in self.cacheCoste:
-                    coste = self.cacheCoste[self.problema.candidatos[candidata][0], individuo[seleccionada][0]]
-                    if coste < minimo and coste != 0: #si no pones la comprobacion, encontes no tiene sentido ya que simpre sera el minimo aquel que sea de uno a el mismo
-                        minimo = coste
+        # Precalcula las intersecciones de los individuos seleccionados
+        intersecciones_individuo = {
+            seleccionada[0]: self.problema.intersecciones[seleccionada[0]]
+            for seleccionada in individuo
+        }
+
+        for candidata, pobCandi in self.problema.candidatos:
+            inicio = self.problema.intersecciones[candidata]
+            minimo = math.inf
+
+            for seleccionada, interseccion_final in intersecciones_individuo.items():
+                # Usa el cache si ya existe el coste
+                if (candidata, seleccionada) in self.cacheCoste:
+                    coste = self.cacheCoste[candidata, seleccionada]
                 else:
-                    final = self.problema.intersecciones[individuo[seleccionada][0]]
-                    coste =  Busqueda_a_estrella(self.problema, inicio, final).busqueda(self.cacheCoste)
-                    self.cacheCoste[self.problema.candidatos[candidata][0], individuo[seleccionada][0]] = coste 
-                    if coste < minimo and coste != 0:
-                        minimo = coste
-                    
-                
+                    # Si no, calcula el coste y guárdalo en el cache
+                    coste = Busqueda_a_estrella(self.problema, inicio, interseccion_final).busqueda(self.cacheCoste)
+                    self.cacheCoste[candidata, seleccionada] = coste
+
+                # Actualiza el mínimo si corresponde
+                if 0 < coste < minimo:
+                    minimo = coste
+
+            # Acumula la población total y el valor ponderado
+            pobTotal += pobCandi
             valor += minimo * pobCandi
-        
+
         return valor / pobTotal
     
     #Metodos de seleccion
