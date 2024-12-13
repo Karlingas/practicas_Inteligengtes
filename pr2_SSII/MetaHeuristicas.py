@@ -106,7 +106,7 @@ class BusquedaGenetica():
         pobTotal = 0  # Inicializa el total de población en 0
 
         # Precalcula las intersecciones de los individuos seleccionados
-        intersecciones_individuo = {
+        intersecciones_individuo = { # He utilizado una compresión de diccionarios, la key es el primer valor de individuo y el valor es la interseccion
             seleccionada[0]: self.problema.intersecciones[seleccionada[0]]
             for seleccionada in individuo
         }
