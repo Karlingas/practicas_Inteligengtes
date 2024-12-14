@@ -64,6 +64,7 @@ class Problema:
         self.intersecciones = {}
         self.acciones = {}  # Diccionario de acciones
         self.candidatos = []
+        self.paraCache = {}
 
         for dato in self.datos_json["intersections"]:
             estado = Estado(dato["identifier"], dato["latitude"],
@@ -80,6 +81,7 @@ class Problema:
 
         for dato in self.datos_json["candidates"]:
             self.candidatos.append((dato[0], dato[1]))
+            self.paraCache[dato[0]] = True
 
         self.veloMax = self.veloMax * (10 / 36)
         self.ordenarAcciones()  # Ordenar las acciones al crear el objeto

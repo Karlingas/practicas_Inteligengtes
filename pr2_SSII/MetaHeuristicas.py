@@ -18,6 +18,10 @@ class BusquedaGenetica():
         self.mejorIndividuoFitness = math.inf
         self.mejorIndividuo = [[],math.inf]
         self.cacheCoste = {}
+        self.vecesAEstre = 0
+
+        print(self.problema.estaciones)
+        print(len(self.problema.candidatos)**2)
 
     def buscar(self):
         tiempoej = time.perf_counter()
@@ -27,11 +31,12 @@ class BusquedaGenetica():
         tiempoMutacion = 0
 
         # Primero inicializamos la población
+        
         mejores = []
         self.inicializacion()
 
         tiemposs = time.perf_counter()- tiempoej
-        for i in range(self.generaciones):  # Iterar sobre las generaciones            
+        for _ in range(self.generaciones):  # Iterar sobre las generaciones            
             #print(f"Generacion {i+1}")
             #Guardamos la mejor solucion de cada generacion, es decir de todos los individuos el fitness
             #print(self.mejorIndividuoFitness)
@@ -88,6 +93,7 @@ class BusquedaGenetica():
             evaluacion = tiempoEvaluacion * 100 / tiempo_ej
             print(f"Evaluacion: {evaluacion}%")
 
+        print(self.vecesAEstre)
         imprimir()
 
         return mejores 
@@ -102,35 +108,30 @@ class BusquedaGenetica():
                 self.mejorIndividuo = self.poblacion[i]
     
     def evaluaIndividuo(self, individuo):
+        pobTotal = 0
         valor = 0
-        pobTotal = 0  # Inicializa el total de población en 0
-
-        # Precalcula las intersecciones de los individuos seleccionados
-        intersecciones_individuo = { # He utilizado una compresión de diccionarios, la key es el primer valor de individuo y el valor es la interseccion
-            seleccionada[0]: self.problema.intersecciones[seleccionada[0]]
-            for seleccionada in individuo
-        }
-
-        for candidata, pobCandi in self.problema.candidatos:
-            inicio = self.problema.intersecciones[candidata]
+        for candidata in range(len(self.problema.candidatos)):
             minimo = math.inf
-
-            for seleccionada, interseccion_final in intersecciones_individuo.items():
-                # Usa el cache si ya existe el coste
-                if (candidata, seleccionada) in self.cacheCoste:
-                    coste = self.cacheCoste[candidata, seleccionada]
-                else:
-                    # Si no, calcula el coste y guárdalo en el cache
-                    coste = Busqueda_a_estrella(self.problema, inicio, interseccion_final).busqueda(self.cacheCoste)
-                    self.cacheCoste[candidata, seleccionada] = coste
-
-                # Actualiza el mínimo si corresponde
-                if 0 < coste < minimo:
-                    minimo = coste
-
-            # Acumula la población total y el valor ponderado
+            pobCandi = self.problema.candidatos[candidata][1]
             pobTotal += pobCandi
+
+            inicio = self.problema.intersecciones[self.problema.candidatos[candidata][0]]
+            for seleccionada in range(len(individuo)):
+                final = self.problema.intersecciones[individuo[seleccionada][0]]
+                
+                if (inicio.interseccion, final.interseccion) in self.cacheCoste:
+                    coste = self.cacheCoste[self.problema.candidatos[candidata][0], individuo[seleccionada][0]]
+                else:
+                    self.vecesAEstre += 1
+                    coste = Busqueda_a_estrella(self.problema, inicio, final).busqueda(self.cacheCoste)
+                    self.cacheCoste[inicio.interseccion, final.interseccion] = coste 
+                
+                if 0 < coste < minimo : #si no pones la comprobacion, encontes no tiene sentido ya que simpre sera el minimo aquel que sea de uno a el mismo
+                    minimo = coste
+                    
+                
             valor += minimo * pobCandi
+        
 
         return valor / pobTotal
     

@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from functools import lru_cache
 from Clases import *
 from queue import PriorityQueue
 
@@ -60,29 +61,39 @@ class Busqueda(ABC):
                     generado=nodo.generado + 1
                 )
                 self.insertarNodo(nuevo_nodo, self.frontera)
+                
     
-    def busqueda(self,cacheGlobalCandidatosCaminos):
+    def busqueda(self,cacheCandidatos):
         e_inicial = Nodo(self.inicio)
         self.insertarNodo(e_inicial, self.frontera)
+        cache = [0] * len(self.problema.candidatos)
+        posActual = 0
+        
 
         while not self.esVacio(self.frontera):
             nodo = self.extraerNodo(self.frontera)
-            if nodo.estado.interseccion not in self.nodos_cerrados: #Sabemos que el nodo no ha sido explorado
+            if nodo.estado.interseccion in self.nodos_cerrados: #Sabemos que el nodo ha sido explorado
+                continue
 
-                if ((nodo.estado.interseccion, self.final.interseccion) in cacheGlobalCandidatosCaminos): #Sabemos que el nodo ya ha sido calculado, return el resultado
-                    return cacheGlobalCandidatosCaminos[nodo.estado.interseccion, self.final.interseccion]
+            if ((nodo.estado.interseccion, self.final.interseccion) in cacheCandidatos): #Sabemos que el nodo ya ha sido calculado, return el resultado
+                return cacheCandidatos[nodo.estado.interseccion, self.final.interseccion]
+            
+            if (nodo.estado.interseccion in self.problema.paraCache): #Sabemos que el nodo es un candidato, guardamos su coste al inicial
+                cacheCandidatos[self.inicio.interseccion, nodo.estado.interseccion] = nodo.coste
+                cache[posActual] = (nodo.estado.interseccion, nodo.coste) #Coste de inicio a nodo
+                posActual += 1
                 
-                if (nodo.estado.interseccion in self.problema.candidatos) and nodo.estado.interseccion != self.inicio: #Sabemos que el nodo es un candidato, guardamos su coste
-                    cacheGlobalCandidatosCaminos[self.inicio, nodo.estado.interseccion] = nodo.coste
-
-                if nodo.estado.interseccion == self.final.interseccion:
-                    return nodo.coste
                 
-                self.nodos_cerrados.add(nodo.estado.interseccion)
-                self.expandir(nodo)
+                
+
+            if nodo.estado.interseccion == self.final.interseccion:
+                return nodo.coste
+            
+            self.nodos_cerrados.add(nodo.estado.interseccion)
+            self.expandir(nodo)
 
 
-        return 9999     #Por si no hay solucion un numero grande para el coste (mas d 2 cm)
+        return 18000     #Por si no hay solucion un numero grande para el coste (mas d 2 cm)
 
 class Busqueda_a_estrella(Busqueda):
     
@@ -95,7 +106,7 @@ class Busqueda_a_estrella(Busqueda):
 
     def insertarNodo(self, nodo, frontera):
         final = self.heuristica.getHeuristica(nodo.estado) / self.problema.veloMax
-        nodo.heuristica =  nodo.coste + final 
+        nodo.heuristica = nodo.coste + final
         frontera.put(((nodo.heuristica), nodo))
 
     def extraerNodo(self, frontera):
@@ -118,7 +129,7 @@ class Heuristica_Geodesica(Heuristica):
     def __init__(self, problema, final):
         super().__init__(problema, final)
 
-
+    @lru_cache(maxsize=999999)
     def getHeuristica(self, estado):
         # Obtener la intersección actual del estado
         # Calcular la distancia entre el estado actual y el estado objetivo

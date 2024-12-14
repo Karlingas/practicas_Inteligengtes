@@ -1,10 +1,7 @@
 from Clases import *
 import matplotlib.pyplot as plt
 from MetaHeuristicas import BusquedaGenetica, BusquedaAleatoria
-ruta_json = r'pr2_SSII\sample-problems-lab2\large\calle_del_virrey_morcillo_albacete_1000_1_candidates_598_ns_99.json'
-
-
-#valores = Busqueda_Aleatoria(problema,1000).busqueda()
+ruta_json = r'/Users/diego/Documents/GitHub/practicas_Inteligengtes/pr2_SSII/sample-problems-lab2/small/calle_agustina_aroca_albacete_250_0_candidates_75_ns_7.json'
 
 
 
@@ -16,7 +13,7 @@ genetica = BusquedaGenetica(problema, 50, 100)
 valores = genetica.buscar()
 
 plt.plot(valores)
-plt.show()
+#plt.show()
 
 
 """
